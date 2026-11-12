@@ -1,0 +1,701 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Torneo del Talento</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Concepto: el mismo mundo de la exposición (lámina de ingeniería esmeralda con cuadrícula de plano y oro),
+   convertido en un tablero de torneo para proyectar. Un solo look oscuro a propósito. */
+:root {
+  --bg: #0a302b; --bg-2: #0b2a38; --ink: #04130f;
+  --mist: #eef4f1; --sage: #a9c7bb; --gold: #f2a93b; --gold-2: #ffcf7a;
+  --line: rgba(220, 236, 230, 0.16); --line-2: rgba(220, 236, 230, 0.32);
+  --panel: rgba(3, 12, 12, 0.55);
+  --ok: #2fa37f; --bad: #e0714f;
+  --c0: #d9573c; --c1: #2f6fd6; --c2: #d99a1e; --c3: #1f9a72;
+  --f-head: "Archivo", "Arial Narrow", Arial, system-ui, sans-serif;
+  --f-body: "Archivo", "Segoe UI", Calibri, system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body { margin: 0; background-color: var(--bg); color: var(--mist); font-family: var(--f-body); -webkit-font-smoothing: antialiased; transition: background-color .8s;
+  background-image:
+    radial-gradient(70% 60% at 65% 35%, rgba(255,255,255,.08), rgba(255,255,255,0) 70%),
+    radial-gradient(130% 100% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,.5) 100%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0 1px, transparent 1px 120px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 1px, transparent 1px 120px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.025) 0 1px, transparent 1px 24px);
+  background-attachment: fixed; }
+body[data-phase="duel"] { background-color: #11234d; }
+body[data-phase="podium"] { background-color: #241a44; }
+#fx { position: fixed; inset: 0; pointer-events: none; z-index: 30; width: 100%; height: 100%; }
+.shell { min-height: 100vh; display: flex; flex-direction: column; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 14px 28px; }
+.frame { position: relative; flex: 1; display: flex; flex-direction: column; border: 1px solid var(--line); padding: clamp(14px, 2.4vw, 34px); }
+.frame::before, .frame::after { content: ""; position: absolute; width: 18px; height: 18px; border: 2px solid var(--gold); }
+.frame::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; } .frame::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* Barra superior */
+#nav { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: space-between; padding-bottom: 16px; margin-bottom: clamp(16px, 2.5vw, 30px); border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; font: 600 12px/1 var(--f-mono); letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+.brand .mk { width: 10px; height: 10px; background: var(--gold); transform: rotate(45deg); }
+.tabs { display: flex; gap: 4px; }
+.tab { border: 1px solid transparent; background: none; color: var(--sage); padding: 8px 14px; border-radius: 999px; font: 600 14px/1 var(--f-body); }
+.tab.on { color: var(--mist); border-color: var(--line-2); background: rgba(255,255,255,.05); }
+.tab:disabled { opacity: .4; cursor: default; }
+.meta { display: flex; align-items: center; gap: 12px; font: 500 11px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--sage); }
+
+.eyebrow { font: 500 12px/1.4 var(--f-mono); letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+h1 { margin: 6px 0 0; font: 800 clamp(40px, 6vw, 86px)/.95 var(--f-head); letter-spacing: -0.03em; text-wrap: balance; }
+h1 em, h2 em { font-style: normal; color: var(--gold); }
+h2 { margin: 6px 0 0; font: 800 clamp(26px, 3vw, 42px)/1.05 var(--f-head); letter-spacing: -0.02em; text-wrap: balance; }
+.lead { color: var(--sage); font-size: clamp(16px, 1.3vw, 19px); line-height: 1.5; max-width: 38em; text-wrap: pretty; }
+.primary { background: var(--gold); color: #1a1206; border: 0; border-radius: 10px; padding: 13px 20px; font: 700 15px/1.1 var(--f-body); transition: transform .15s, background .2s; }
+.primary:hover:not(:disabled) { background: var(--gold-2); }
+.primary:active:not(:disabled) { transform: translateY(1px); }
+.primary:disabled { opacity: .4; cursor: default; }
+.primary.xl { padding: 18px 30px; font-size: 19px; }
+.ghost { background: transparent; border: 1px solid var(--line-2); color: var(--mist); border-radius: 10px; padding: 12px 16px; font: 600 14px/1.1 var(--f-body); }
+.ghost:hover:not(:disabled) { border-color: var(--gold); }
+.ghost:disabled { opacity: .4; cursor: default; }
+.sm { padding: 7px 11px; font-size: 12.5px; border-radius: 8px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: clamp(16px, 2vw, 26px); display: grid; gap: 14px; backdrop-filter: blur(8px); }
+label { display: grid; gap: 6px; font: 600 13px/1.3 var(--f-body); color: var(--sage); }
+label small, legend small { font-weight: 500; color: rgba(169,199,187,.7); }
+input, select, textarea { width: 100%; background: rgba(0,0,0,.28); border: 1px solid var(--line-2); border-radius: 8px; padding: 10px 12px; color: var(--mist); font-size: 15px; }
+textarea { resize: vertical; line-height: 1.5; }
+select option { background: #0b2a38; }
+.err { color: var(--bad); font-weight: 600; font-size: 14px; min-height: 1em; }
+.err:empty { display: none; }
+#toast { position: fixed; z-index: 40; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: rgba(4,19,15,.96); border: 1px solid var(--gold); padding: 11px 16px; border-radius: 10px; font-weight: 600; max-width: calc(100vw - 32px); }
+.confirm { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 16px; padding: 12px 14px; border: 1px solid var(--gold); border-radius: 10px; background: rgba(0,0,0,.3); font-weight: 600; }
+
+/* Inscripción */
+.setup { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 60px); align-items: start; }
+.intro { display: grid; gap: 14px; align-content: start; padding-top: 10px; }
+.rules { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; border-top: 1px solid var(--line-2); padding-top: 14px; max-width: 36em; }
+.rules li { color: var(--sage); line-height: 1.45; } .rules b { color: var(--mist); }
+.cnt { font: 500 12px/1 var(--f-mono); color: var(--gold); letter-spacing: .08em; margin-top: -6px; }
+.cnt:empty { display: none; }
+.cnt.warn { color: var(--bad); }
+.row3 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.prizes { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 8px; margin: 0; }
+.prizes legend { padding: 0 6px; font: 600 13px/1 var(--f-body); color: var(--sage); }
+.prizes label { grid-template-columns: 40px 1fr; align-items: center; }
+.medal { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; font: 700 13px/1 var(--f-mono); color: #1a1206; }
+.m0 { background: #f2c14e; } .m1 { background: #c9d3d6; } .m2 { background: #d38a52; }
+
+/* Cuadro */
+.bhead { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.bact { display: flex; gap: 10px; flex-wrap: wrap; }
+.scroll { overflow-x: auto; padding-bottom: 8px; }
+.bracket { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(210px, 1fr); gap: 22px; min-width: min-content; }
+.col { display: flex; flex-direction: column; }
+.rname { font: 700 15px/1.2 var(--f-head); padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px solid var(--line-2); display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.rname small { font: 500 11px/1 var(--f-mono); color: var(--gold); letter-spacing: .08em; }
+.col.third .rname small { color: var(--sage); }
+.ms { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 12px; }
+.match { position: relative; text-align: left; width: 100%; padding: 0; border-radius: 10px; border: 1px solid var(--line); background: rgba(0,0,0,.28); overflow: hidden; display: grid; }
+.match .pl { display: flex; justify-content: space-between; gap: 10px; padding: 9px 12px; font: 600 14.5px/1.2 var(--f-body); }
+.match .pl + .pl { border-top: 1px solid var(--line); }
+.match .pl .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.match .sc { font: 500 13px/1.2 var(--f-mono); color: var(--sage); font-variant-numeric: tabular-nums; }
+.match .pl.bye .nm { color: rgba(169,199,187,.55); font-style: italic; font-weight: 500; }
+.match.wait .nm { color: rgba(169,199,187,.6); }
+.match.done .pl:not(.w) .nm { color: rgba(169,199,187,.6); text-decoration: line-through; text-decoration-color: rgba(169,199,187,.4); }
+.match.done .pl.w { background: rgba(242,169,59,.1); } .match.done .pl.w .sc { color: var(--gold); }
+.match.ready { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,169,59,.12); }
+.match.ready:hover { background: rgba(242,169,59,.08); }
+.match .go { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: var(--gold); color: #1a1206; font: 700 11px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; padding: 6px 8px; border-radius: 6px; }
+.match:disabled { cursor: default; }
+.hint { color: var(--sage); font-size: 14px; margin-top: 18px; }
+
+/* Duelo */
+.duel { display: grid; gap: clamp(16px, 2.4vw, 28px); }
+.duelhead { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 14px; align-items: center; }
+.fighter { display: grid; gap: 4px; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--line); background: rgba(0,0,0,.25); transition: border-color .3s, background .3s; min-width: 0; }
+.fighter.r { text-align: right; }
+.fighter.active { border-color: var(--gold); background: rgba(242,169,59,.1); }
+.fighter .nm { font: 700 clamp(16px, 1.8vw, 24px)/1.1 var(--f-head); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fighter .pts { font: 800 clamp(26px, 3vw, 44px)/1 var(--f-head); color: var(--gold); font-variant-numeric: tabular-nums; }
+.fighter .dots { display: flex; gap: 5px; } .fighter.r .dots { justify-content: flex-end; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--line-2); }
+.dots i.ok { background: var(--ok); border-color: var(--ok); } .dots i.bad { background: var(--bad); border-color: var(--bad); } .dots i.now { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(242,169,59,.35); }
+.vs { display: grid; justify-items: center; gap: 4px; text-align: center; font: 500 11px/1.3 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--sage); }
+.vs b { font: 800 clamp(24px, 2.6vw, 36px)/1 var(--f-head); color: var(--mist); letter-spacing: 0; }
+.turn { display: grid; justify-items: center; text-align: center; gap: 16px; padding-block: clamp(20px, 6vh, 70px); }
+.turn .big { font: 800 clamp(44px, 8vw, 110px)/.95 var(--f-head); letter-spacing: -0.03em; text-wrap: balance; }
+.turn .big.gold { color: var(--gold); }
+.qcard { display: grid; gap: clamp(14px, 2vw, 22px); }
+.qmeta { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font: 500 12px/1.3 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--sage); }
+.qmeta .chip-t { background: var(--gold); color: #1a1206; padding: 5px 9px; border-radius: 6px; font-weight: 600; }
+.qmeta .who { margin-left: auto; text-transform: none; letter-spacing: 0; font: 500 15px/1.3 var(--f-body); } .qmeta .who b { color: var(--mist); }
+.timer { display: flex; align-items: center; gap: 14px; }
+.timer .tb { flex: 1; height: 8px; border-radius: 8px; background: rgba(255,255,255,.1); overflow: hidden; }
+.timer i { display: block; height: 100%; background: var(--gold); transform-origin: left; transition: transform .1s linear, background .3s; }
+.timer i.low { background: var(--bad); }
+#tnum { font: 700 26px/1 var(--f-mono); min-width: 44px; text-align: right; font-variant-numeric: tabular-nums; }
+.q { font: 700 clamp(24px, 3vw, 44px)/1.15 var(--f-head); margin: 0; max-width: 32em; }
+.opts { display: grid; gap: 12px; }
+.opts.four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.opts.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.opt { display: flex; align-items: center; gap: 14px; text-align: left; border: 0; border-radius: 12px; padding: clamp(14px, 2vw, 24px) 18px; min-height: clamp(70px, 10vh, 110px); color: #fff; font: 700 clamp(16px, 1.6vw, 24px)/1.2 var(--f-body); box-shadow: inset 0 -4px 0 rgba(0,0,0,.25); transition: transform .12s, opacity .3s, filter .2s; }
+.opt:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-2px); }
+.opt .sh { flex: none; width: 40px; height: 40px; display: grid; place-items: center; background: rgba(0,0,0,.2); border-radius: 8px; font-size: 20px; }
+.c0 { background: var(--c0); } .c1 { background: var(--c1); } .c2 { background: var(--c2); } .c3 { background: var(--c3); }
+.opt.dim { opacity: .28; } .opt.wrong { opacity: .55; outline: 3px solid #fff; outline-offset: -3px; } .opt.right { outline: 4px solid #fff; outline-offset: 3px; }
+.opt:disabled { cursor: default; }
+.ord { display: grid; gap: 16px; }
+.slots { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.slot { display: flex; align-items: center; gap: 10px; min-height: 54px; border: 1px dashed var(--line-2); border-radius: 10px; padding: 8px 12px; font: 600 16px/1.2 var(--f-body); }
+.slot.full { border-style: solid; border-color: var(--gold); background: rgba(242,169,59,.1); }
+.slot .n { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--gold); color: #1a1206; font: 600 12px/1 var(--f-mono); }
+.pool { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip { border: 1px solid var(--line-2); background: rgba(255,255,255,.06); border-radius: 999px; padding: 12px 18px; font: 600 16px/1 var(--f-body); }
+.chip:hover:not(:disabled) { border-color: var(--gold); }
+.chip:disabled { opacity: .25; cursor: default; }
+.ordact { display: flex; gap: 10px; flex-wrap: wrap; }
+.ordrev, .numrev { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.ordrev ol { margin: 8px 0 0; padding-left: 22px; display: grid; gap: 6px; font: 600 17px/1.3 var(--f-body); }
+.ordrev ol.bad, .numrev b.bad { color: var(--bad); }
+.numrev b { display: block; margin-top: 6px; font: 800 clamp(28px, 3vw, 44px)/1 var(--f-head); }
+.numf { display: grid; gap: 10px; max-width: 520px; }
+.numrow { display: flex; gap: 10px; }
+.numrow input { font: 700 clamp(26px, 3vw, 40px)/1 var(--f-mono); padding: 12px 16px; text-align: right; }
+.pad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pad button { background: rgba(255,255,255,.06); border: 1px solid var(--line); border-radius: 10px; padding: 12px; font: 600 20px/1 var(--f-mono); }
+.pad button:hover { border-color: var(--gold); }
+.verdict { display: grid; gap: 8px; padding: 18px 20px; border-radius: 12px; border: 1px solid; }
+.verdict.ok { border-color: var(--ok); background: rgba(47,163,127,.14); } .verdict.bad { border-color: var(--bad); background: rgba(224,113,79,.12); }
+.verdict .v1 { font: 800 clamp(24px, 2.6vw, 36px)/1 var(--f-head); }
+.verdict.ok .v1 { color: #7fe0bc; } .verdict.bad .v1 { color: #ffab90; }
+.verdict .v2 { font: 600 14px/1 var(--f-mono); color: var(--gold); letter-spacing: .06em; }
+.verdict p { margin: 2px 0 6px; color: var(--mist); font-size: 16px; line-height: 1.5; max-width: 50em; }
+.verdict .primary { justify-self: start; }
+.qfoot { display: flex; justify-content: flex-end; }
+
+/* Podio */
+.podium { display: grid; justify-items: center; text-align: center; gap: 10px; }
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 220px)); gap: clamp(10px, 2vw, 26px); align-items: end; width: 100%; justify-content: center; margin-top: 30px; min-height: 360px; }
+.step { display: grid; gap: 8px; justify-items: stretch; animation: up .8s cubic-bezier(.2,.8,.2,1) both; }
+.step.s1 { animation-delay: .5s; } .step.s3 { animation-delay: .25s; }
+.pname { font: 800 clamp(18px, 2vw, 28px)/1.1 var(--f-head); text-wrap: balance; }
+.prize { font: 600 13px/1.3 var(--f-body); color: var(--gold); }
+.block { height: calc(var(--h) * 2.6px); min-height: 70px; border-radius: 12px 12px 0 0; display: grid; place-items: start center; padding-top: 14px; font: 800 clamp(30px, 4vw, 56px)/1 var(--f-head); color: #1a1206; }
+.s1 .block { background: linear-gradient(#ffd66b, #e9a23b); } .s2 .block { background: linear-gradient(#e6ecee, #a9b6ba); } .s3 .block { background: linear-gradient(#e7a675, #b7693a); }
+.pact { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; justify-content: center; }
+@keyframes up { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Banco */
+.bankgrid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+.filters { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; } .filters select { width: auto; } .filters input { flex: 1; min-width: 160px; }
+.tbl { overflow: auto; max-height: 68vh; border: 1px solid var(--line); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { position: sticky; top: 0; background: #082520; text-align: left; font: 500 11px/1.2 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--sage); padding: 10px 12px; }
+td { padding: 10px 12px; border-top: 1px solid var(--line); vertical-align: top; line-height: 1.4; }
+td small { display: block; margin-top: 3px; color: rgba(169,199,187,.7); font: 500 11px/1.2 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; }
+td:nth-child(3) { color: var(--gold); white-space: nowrap; }
+tr.used td { color: rgba(169,199,187,.55); }
+.tag { display: inline-block; font: 600 10.5px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 5px; background: rgba(255,255,255,.08); color: var(--sage); }
+.addq h3 { margin: 0; font: 700 18px/1.2 var(--f-head); }
+
+@media (max-width: 860px) {
+  .setup, .bankgrid { grid-template-columns: minmax(0, 1fr); }
+  .opts.four { grid-template-columns: minmax(0, 1fr); }
+  .duelhead { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .vs { grid-column: 1 / -1; grid-row: 1; }
+  .qmeta .who { margin-left: 0; }
+  .ordrev, .numrev { grid-template-columns: minmax(0, 1fr); }
+  .steps { min-height: 280px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="shell"><div class="frame"><header id="nav"></header><main id="app" aria-live="polite"></main></div></div>
+<script>
+// Banco de preguntas. mc: la primera opción es la correcta (se barajan al mostrar).
+// vf: a = verdadero/falso. ord: o en el orden correcto. l = nivel 1 fácil, 2 medio, 3 difícil.
+const BANCO = [
+// ---- Concepto ----
+["mc",1,"Concepto","¿Cuál es una de las tres preguntas de la planeación del talento?",["¿Cuántas personas necesito?","¿Cuánto cuesta una máquina?","¿Dónde queda la empresa?","¿Quién es el dueño?"],"Las tres preguntas son: cuántas personas, con qué competencias y cuándo."],
+["vf",1,"Concepto","Las máquinas se compran; el talento se construye.",true,"Fue la idea central de la lámina 3."],
+["vf",1,"Concepto","Planear el talento es solo asunto de Recursos Humanos y no tiene que ver con ingeniería.",false,"Los ingenieros industriales lideran procesos y equipos, así que también planean talento."],
+["mc",1,"Concepto","La planeación del talento define cuántas personas y con qué competencias. ¿Qué otro elemento define?",["El momento en que se necesitan","El salario de cada cargo","El lugar de nacimiento","La edad de cada persona"],"Las tres preguntas son cuántas personas, con qué competencias y cuándo."],
+["mc",1,"Concepto","Lo contrario de planear el talento es…",["Apagar incendios","Medir indicadores","Hacer un diagnóstico","Formar al personal"],"Reaccionar cuando el problema ya llegó es apagar incendios."],
+["mc",2,"Concepto","¿Qué tres cosas hacen al talento difícil de copiar?",["Conocimiento, experiencia y cultura","Máquinas, edificios y marcas","Salarios, bonos y horarios","Precios, clientes y proveedores"],"Son las tres esferas que giraban alrededor de la ficha dorada."],
+["vf",2,"Concepto","Hoy el talento se considera solo un gasto de nómina.",false,"Hoy se ve como ventaja competitiva."],
+["mc",2,"Concepto","Según Chiavenato, la planeación del talento consiste sobre todo en…",["Prever las necesidades de personal antes de que ocurran","Contratar cuando aparece una vacante","Reducir la nómina","Evaluar el desempeño una vez al año"],"No es solo contratar: es prever."],
+["vf",2,"Concepto","Tener más personal del necesario no le cuesta nada a la empresa.",false,"Tener de más sube los costos de nómina sin necesidad."],
+["mc",2,"Concepto","Formar a un buen supervisor puede tomar…",["Varios meses","Un día","Una hora","Nada: se contrata hecho"],"Por eso hay que empezar antes de que el actual se vaya."],
+["mc",3,"Concepto","Una empresa espera a que renuncie su supervisor para buscar reemplazo. ¿Cuál es el problema?",["Ya es tarde: formar uno toma meses","Va a pagar menos","No necesita reemplazo","Ninguno, es lo ideal"],"Planear es anticiparse al momento en que hace falta."],
+["vf",3,"Concepto","Algunas competencias se contratan afuera y otras se desarrollan con la gente que ya está.",true,"Las dos vías se combinan según el costo y el tiempo."],
+["mc",3,"Concepto","Si me paso en la cantidad de personal tengo costos; si me quedo corto tengo…",["Sobrecarga, horas extra y atrasos","Más ganancias","Menos rotación","Mejor clima"],"Las dos fallas cuestan: por eso se calcula la dotación."],
+// ---- Objetivos ----
+["mc",1,"Objetivos","¿Cuál es un objetivo de planear el talento?",["Tener el personal adecuado a tiempo","Comprar más máquinas","Subir los precios","Abrir más oficinas"],"Cantidad y perfil correctos antes de que haga falta."],
+["vf",1,"Objetivos","Reducir la rotación es uno de los objetivos de planear el talento.",true,"Menos rotación significa menos costos y menos conocimiento perdido."],
+["mc",2,"Objetivos","¿Qué provoca contratar “a la carrera”?",["Errores de selección y reprocesos","Más productividad","Menos costos","Mejor clima laboral"],"Sin tiempo para seleccionar bien, se equivoca el perfil."],
+["mc",2,"Objetivos","¿Hacia qué deben apuntar todos los objetivos de la planeación del talento?",["La estrategia de la empresa","El salario del gerente","La cantidad de máquinas","Las vacaciones del personal"],"Cada objetivo acerca a la empresa a cumplir su estrategia."],
+["mc",2,"Objetivos","Tener sucesores para los cargos críticos sirve para…",["Que la operación no dependa de una sola persona","Despedir más fácil","Pagar menos","Evitar capacitaciones"],"Si alguien clave se va, otro está listo para seguir."],
+["vf",2,"Objetivos","Cuando una persona se va, se lleva parte del conocimiento de la empresa.",true,"Por eso la rotación cuesta más que el reemplazo."],
+["mc",3,"Objetivos","¿Qué objetivo busca que todos “remen hacia el mismo lado”?",["Equipos alineados con la estrategia","Menos rotación","Personal a tiempo","Desarrollo de líderes"],"Que cada persona sepa cómo aporta a la estrategia."],
+["vf",3,"Objetivos","Desarrollar líderes y sucesores no es parte de la planeación del talento.",false,"Desarrollo y retención es uno de los cuatro objetivos."],
+// ---- Estrategia ----
+["ord",2,"Estrategia","Ordena la relación de la estrategia a los resultados",["Estrategia","Talento requerido","Plan de talento","Resultados"],"Cada decisión lleva a la siguiente, como los bloques de la lámina 6."],
+["vf",2,"Estrategia","La relación entre estrategia y talento es de doble vía.",true,"Si no hay talento disponible, la estrategia también se ajusta."],
+["mc",2,"Estrategia","Si una empresa automatiza, ¿qué perfil probablemente necesitará más?",["Técnicos de mantenimiento y programación","Más operarios manuales","Vendedores puerta a puerta","Ninguno"],"Automatizar cambia los perfiles: menos tareas manuales, más técnicas."],
+["mc",2,"Estrategia","La empresa va a duplicar la producción. ¿Qué debe preguntarse talento humano?",["Cuántos operarios, técnicos y supervisores más, y para cuándo","Qué color pintar la planta","Cuántas máquinas vender","Nada, no le compete"],"Fue el ejemplo de la lámina 6."],
+["mc",3,"Estrategia","Si en el mercado no está el talento que la estrategia necesita, ¿qué pasa?",["La estrategia se ajusta en ritmo o alcance","Se sigue igual","Se cierra la empresa","Se despide a todos"],"Es la doble vía: el talento también condiciona la estrategia."],
+["vf",3,"Estrategia","Talento humano debería enterarse de la estrategia después de que se decide.",false,"Debe estar en la mesa donde se planea la empresa."],
+["mc",3,"Estrategia","Productividad, calidad, costos y continuidad son…",["Los resultados del plan de talento","Las brechas","Las fases","Las herramientas"],"Son el último bloque de la cadena estrategia → resultados."],
+// ---- Fases ----
+["mc",1,"Proceso","Las fases del proceso forman un ciclo parecido al…",["PHVA","5S","Kanban","Pareto"],"Planear, hacer, verificar y actuar, y volver a empezar."],
+["ord",2,"Proceso","Ordena las primeras cuatro fases",["Diagnóstico","Oferta y demanda","Objetivos y brechas","Estrategias"],"Del diagnóstico se pasa a comparar, luego a las brechas y a las estrategias."],
+["ord",3,"Proceso","Ordena las seis fases del proceso",["Diagnóstico","Oferta y demanda","Objetivos y brechas","Estrategias","Implementación","Seguimiento y ajuste"],"Es un ciclo: después de la 6 se vuelve a la 1."],
+["mc",3,"Proceso","Comparar la oferta con la demanda muestra…",["Las brechas: qué falta, qué sobra y qué desarrollar","El salario promedio","La lista de clientes","El presupuesto de marketing"],"Con las brechas se fijan los objetivos."],
+["vf",2,"Proceso","El plan de talento se hace una vez y se archiva.",false,"Es un ciclo que se repite."],
+["mc",2,"Proceso","Contratar, capacitar y reubicar son ejemplos de…",["Estrategias para cerrar brechas","Indicadores","Diagnósticos","Brechas"],"Cada estrategia tiene su costo y su tiempo."],
+["vf",3,"Proceso","En el diagnóstico se revisan la rotación y el ausentismo actuales.",true,"También la plantilla, las competencias y las edades."],
+["mc",3,"Proceso","¿Qué se hace con los resultados del seguimiento?",["Ajustar el siguiente ciclo","Nada","Archivarlos","Despedir al jefe"],"Por eso el proceso es un ciclo."],
+// ---- Herramientas ----
+["mc",1,"Herramientas","¿Cuál es una herramienta de la planeación del talento?",["Análisis DOFA","Diagrama de Gantt","Hoja de vida","Factura"],"DOFA, perfil de cargos, inventario, matriz de sucesión e indicadores."],
+["mc",2,"Herramientas","¿Qué herramienta muestra quién puede reemplazar a quién?",["Matriz de sucesión","Análisis DOFA","Perfil de cargos","Inventario de talento"],"Sirve para los cargos críticos."],
+["mc",2,"Herramientas","¿Qué herramienta describe funciones y requisitos de cada puesto?",["Perfil de cargos","Matriz de sucesión","Análisis DOFA","Indicadores"],"Sin perfiles claros no se selecciona bien."],
+["mc",2,"Herramientas","¿Qué herramienta funciona como un archivador de las capacidades de la plantilla?",["Inventario de talento","Perfil de cargos","Análisis DOFA","Matriz de sucesión"],"Muestra qué capacidades hay y dónde están."],
+["mc",1,"Herramientas","En DOFA, ¿qué significa la F?",["Fortalezas","Finanzas","Fábrica","Formación"],"Debilidades, Oportunidades, Fortalezas y Amenazas."],
+["mc",2,"Herramientas","En un DOFA de talento, “escasez de técnicos en la región” es…",["Una amenaza","Una fortaleza","Una oportunidad","Una debilidad"],"Es un factor externo negativo."],
+["mc",3,"Herramientas","En un DOFA, “personal clave a punto de pensionarse” es sobre todo…",["Una debilidad interna","Una oportunidad externa","Una amenaza externa","Una fortaleza sin riesgo"],"Es interno y pone en riesgo el conocimiento."],
+["mc",1,"Herramientas","KPI significa…",["Indicador clave de desempeño","Plan de inversión","Proceso de calidad","Informe de personal"],"Key Performance Indicator."],
+["mc",2,"Herramientas","¿Cuál es la fórmula de la rotación?",["Salidas ÷ plantilla promedio × 100","Plantilla ÷ salidas","Ingresos − salidas","Salidas × plantilla"],"Se expresa en porcentaje."],
+["vf",3,"Herramientas","Un indicador de rotación solo dice algo cuando se compara con una meta o un periodo.",true,"Un número suelto no dice si vamos bien o mal."],
+["mc",2,"Herramientas","¿Cuál NO es un indicador de talento humano?",["Precio de venta del producto","Rotación","Ausentismo","Tiempo de contratación"],"El precio es un indicador comercial."],
+// ---- Cadena ----
+["ord",2,"Cadena","Ordena los primeros cuatro procesos de la cadena",["Atraer","Seleccionar","Integrar","Formar"],"Del ingreso a la formación."],
+["ord",3,"Cadena","Ordena los seis procesos de la cadena",["Atraer","Seleccionar","Integrar","Formar","Desarrollar","Retener"],"Del ingreso a la retención."],
+["mc",2,"Cadena","Una buena inducción ayuda a…",["Bajar la rotación temprana","Subir los precios","Evitar capacitaciones","Contratar más"],"Los primeros meses son cuando más gente se va."],
+["vf",2,"Cadena","Desarrollar es exactamente lo mismo que capacitar.",false,"Desarrollar prepara para más responsabilidades: planes de carrera y sucesión."],
+["mc",3,"Cadena","¿Por qué “retener” es el eslabón clave?",["Recupera lo invertido en los anteriores","Es el más barato","Es el primero","No es clave"],"Formar a alguien y que se vaya es perder la inversión."],
+["mc",2,"Cadena","Clima laboral, reconocimiento y oportunidades de crecer son parte de…",["Retener","Atraer","Seleccionar","Integrar"],"Son lo que hace que la gente quiera quedarse."],
+["vf",1,"Cadena","Si falla un eslabón de la cadena, se afecta todo el proceso.",true,"Por eso se dibujó como una cadena."],
+["mc",3,"Cadena","Elegir al candidato que encaja con el cargo y con la cultura es…",["Seleccionar","Atraer","Integrar","Desarrollar"],"Se hace con criterios claros."],
+// ---- Casos ----
+["mc",2,"Casos","¿Qué empresa es famosa por usar People Analytics?",["Google","Toyota","Bancolombia","Ninguna"],"Decide sobre su gente con datos."],
+["mc",3,"Casos","People Analytics significa…",["Tomar decisiones de talento con datos","Hacer encuestas a clientes","Analizar las ventas","Contratar por intuición"],"Contratación, promoción y retención con datos."],
+["vf",3,"Casos","Las horas de formación, por sí solas, demuestran que la formación sirvió.",false,"Hay que cruzarlas con desempeño y movilidad interna."],
+["mc",3,"Casos","Para medir el impacto de la formación, las horas se cruzan con…",["Desempeño y movilidad interna","El precio de las acciones","El número de oficinas","Nada más"],"Así se ve si la formación cambió algo."],
+// ---- Tendencias ----
+["mc",2,"Tendencias","Ante la automatización, la idea es…",["Reentrenar a la gente","Despedir a todos","No hacer nada","Contratar solo máquinas"],"Reentrenar, no solo reemplazar."],
+["mc",2,"Tendencias","El trabajo híbrido exige liderar por…",["Objetivos y resultados","Horas en la oficina","Cámaras de vigilancia","Antigüedad"],"No por control de presencia."],
+["mc",3,"Tendencias","Al usar datos para predecir quién se va a ir, hay que cuidar…",["La privacidad y la calidad de los datos","El color del gráfico","El precio del software","Nada"],"Es información de las personas."],
+["vf",2,"Tendencias","El bienestar y la salud mental ayudan a atraer y retener talento.",true,"Ya no son un extra."],
+["mc",3,"Tendencias","“La tecnología cambia las tareas; la planeación redefine…”",["las capacidades","los precios","los clientes","las máquinas"],"Era el título de la lámina de tendencias."],
+["mc",2,"Tendencias","La inteligencia artificial hace que…",["Aparezcan perfiles nuevos y otras tareas se automaticen","Desaparezca la planeación","No se necesite formar a nadie","Nada cambie"],"Hay que planear qué competencias vendrán."],
+// ---- Actividad y cierre ----
+["mc",2,"Decisión","La producción subirá 20 % en 3 meses. ¿Qué haces primero?",["Diagnosticar capacidad y brechas","Contratar de inmediato","Horas extra indefinidas","Esperar a ver qué pasa"],"Primero se mide, después se decide."],
+["mc",3,"Decisión","¿Por qué las horas extra indefinidas no son buena solución?",["Traen cansancio, accidentes y rotación","Siempre son ilegales","Son muy baratas","No tienen ningún problema"],"Sirven solo como medida temporal."],
+["vf",1,"Decisión","Antes de decidir cómo cubrir una necesidad de personal hay que medirla.",true,"Es la fase 1: diagnóstico."],
+["mc",3,"Decisión","Contratar de inmediato sin calcular la carga puede llevar a…",["Contratar de más o el perfil equivocado","Ahorrar siempre","Bajar la rotación","Nada malo"],"Por eso la respuesta correcta era diagnosticar."],
+["vf",2,"Cierre","Como ingenieros industriales, liderar equipos también incluye planear el talento.",true,"Cuarta conclusión."],
+["mc",2,"Cierre","¿En qué se apoya la planeación del talento?",["En datos y herramientas","En la intuición","En la suerte","En los rumores"],"Tercera conclusión."],
+["ord",3,"Cierre","Ordena las cuatro conclusiones como se presentaron",["Anticiparse","Alinear","Medir","Liderar"],"Las cuatro columnas que sostienen el techo."],
+];
+
+</script>
+<script>
+(() => {
+"use strict";
+const KEY = "torneo-talento-v1";
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const fmt = (n) => Number(n).toLocaleString("es-CO", { maximumFractionDigits: 2 });
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- Banco ---------- */
+const hid = (t) => { let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) >>> 0; return "q" + h.toString(36); };
+const STATIC = BANCO.map((r) => ({ id: hid(r[3]), t: r[0], l: r[1], c: r[2], q: r[3], o: r[0] === "vf" ? null : r[4], a: r[0] === "vf" ? r[4] : null, e: r[5] }));
+const TYPE = { mc: "Opción múltiple", vf: "Verdadero o falso", ord: "Ordena", num: "Calcula" };
+
+const GENS = {
+  rotacion: { l: 2, make() { const s = rnd(3, 24), p = rnd(4, 30) * 10; return { key: `rot${s}-${p}`, q: `En un año salieron ${s} personas y la plantilla promedio fue de ${p}. ¿Cuál es la rotación? (en %, con 1 decimal)`, ans: Math.round(s / p * 1000) / 10, tol: 0.1, unit: "%", e: `${s} ÷ ${p} × 100 = ${fmt(Math.round(s / p * 1000) / 10)} %` }; } },
+  carga: { l: 2, make() { const u = rnd(5, 60) * 1000, h = rnd(2, 16) * 0.05; const v = Math.round(u * h); return { key: `car${u}-${h.toFixed(2)}`, q: `Una planta debe producir ${fmt(u)} unidades al mes y cada una requiere ${fmt(h)} h de trabajo. ¿Cuántas horas-hombre necesita al mes?`, ans: v, tol: 0.5, unit: "h", e: `${fmt(u)} × ${fmt(h)} = ${fmt(v)} horas-hombre` }; } },
+  brecha: { l: 1, make() { const n = rnd(30, 140), m = n - rnd(3, 25); return { key: `bre${n}-${m}`, q: `Una planta necesita ${n} operarios y hoy tiene ${m}. ¿Cuántos operarios le faltan?`, ans: n - m, tol: 0, unit: "operarios", e: `${n} − ${m} = ${n - m}` }; } },
+  productivas: { l: 3, make() { const H = rnd(40, 50) * 4, a = rnd(3, 12), f = rnd(16, 19) * 5; const v = Math.round(H * (1 - a / 100) * (f / 100) * 10) / 10; return { key: `pro${H}-${a}-${f}`, q: `Un operario trabaja ${H} h al mes, con ${a} % de ausentismo y ${f} % de eficiencia. ¿Cuántas horas productivas tiene? (1 decimal)`, ans: v, tol: 0.6, unit: "h", e: `${H} × ${fmt(1 - a / 100)} × ${fmt(f / 100)} ≈ ${fmt(v)} h` }; } },
+  operarios: { l: 3, make() { const C = rnd(30, 120) * 200, r = rnd(130, 165); const v = Math.ceil(C / r); return { key: `ope${C}-${r}`, q: `La carga es de ${fmt(C)} horas-hombre al mes y cada operario rinde ${r} h productivas. ¿Cuántos operarios se necesitan? (redondea hacia arriba)`, ans: v, tol: 0, unit: "operarios", e: `${fmt(C)} ÷ ${r} = ${fmt(Math.round(C / r * 100) / 100)} → ${v}` }; } },
+};
+
+/* ---------- Estado ---------- */
+const DEF = () => ({ v: 1, phase: "setup", settings: { perPlayer: 2, time: 20, prizes: ["", "", ""], sound: true }, draft: "", players: [], rounds: [], third: null, used: {}, gen: {}, custom: [], cur: null, view: "bracket" });
+let S;
+try { S = JSON.parse(localStorage.getItem(KEY)) || DEF(); } catch (e) { S = DEF(); }
+S = Object.assign(DEF(), S);
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const allQ = () => STATIC.concat(S.custom);
+const remaining = () => allQ().filter(q => !S.used[q.id]);
+
+/* ---------- Sonido ---------- */
+let actx = null;
+function beep(kind) {
+  if (!S.settings.sound) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const seq = kind === "ok" ? [[660, .09], [880, .14]] : kind === "bad" ? [[220, .18], [160, .22]] : kind === "win" ? [[523, .12], [659, .12], [784, .12], [1047, .3]] : [[880, .05]];
+    let t = actx.currentTime;
+    seq.forEach(([f, d]) => { const o = actx.createOscillator(), g = actx.createGain(); o.type = "triangle"; o.frequency.value = f; g.gain.setValueAtTime(.18, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g).connect(actx.destination); o.start(t); o.stop(t + d); t += d * .9; });
+  } catch (e) {}
+}
+
+/* ---------- Cuadro ---------- */
+const BYE = -1;
+function buildBracket(names) {
+  const order = shuffle(names.map((_, i) => i));
+  const n = order.length; let size = 1; while (size < n) size *= 2;
+  const R = Math.log2(size), byes = size - n, rounds = [];
+  let k = 0; const r0 = [];
+  for (let i = 0; i < size / 2; i++) { const a = order[k++]; const b = i < byes ? BYE : order[k++]; r0.push(mkMatch(0, i, a, b)); }
+  rounds.push(r0);
+  for (let r = 1; r < R; r++) { const arr = []; for (let i = 0; i < size / Math.pow(2, r + 1); i++) arr.push(mkMatch(r, i, null, null)); rounds.push(arr); }
+  S.rounds = rounds; S.third = R >= 2 ? mkMatch("t", 0, null, null) : null;
+  autoResolve();
+}
+function mkMatch(r, i, a, b) { return { id: r + "-" + i, r, i, a, b, sa: 0, sb: 0, w: null, lz: null, done: false }; }
+const R = () => S.rounds.length;
+function matchById(id) { if (S.third && S.third.id === id) return S.third; for (const rd of S.rounds) for (const m of rd) if (m.id === id) return m; return null; }
+function setResult(m, winSide) {
+  m.done = true; m.w = winSide === "a" ? m.a : m.b; m.lz = winSide === "a" ? m.b : m.a;
+  if (m.r === "t") return;
+  if (m.r < R() - 1) { const nx = S.rounds[m.r + 1][Math.floor(m.i / 2)]; if (m.i % 2 === 0) nx.a = m.w; else nx.b = m.w; }
+  if (S.third && m.r === R() - 2) { if (m.i % 2 === 0) S.third.a = m.lz; else S.third.b = m.lz; }
+}
+function autoResolve() {
+  let changed = true;
+  while (changed) { changed = false;
+    const all = S.rounds.flat().concat(S.third ? [S.third] : []);
+    for (const m of all) { if (m.done || m.a === null || m.b === null) continue;
+      if (m.a === BYE && m.b === BYE) { setResult(m, "a"); changed = true; }
+      else if (m.b === BYE) { setResult(m, "a"); m.bye = true; changed = true; }
+      else if (m.a === BYE) { setResult(m, "b"); m.bye = true; changed = true; } }
+  }
+}
+const ready = (m) => m && !m.done && m.a !== null && m.b !== null && m.a !== BYE && m.b !== BYE;
+function nextMatch() { for (const rd of S.rounds) for (const m of rd) if (ready(m)) { if (m.r === R() - 1 && ready(S.third)) return S.third; return m; } return ready(S.third) ? S.third : null; }
+const finished = () => { const f = S.rounds[R() - 1][0]; return f.done && (!S.third || S.third.done || S.third.a === null && S.third.b === null); };
+const pname = (i) => i === null ? "Por definir" : i === BYE ? "Pasa directo" : S.players[i];
+function roundName(r) {
+  if (r === "t") return "Tercer puesto";
+  const left = R() - r;
+  return left === 1 ? "Final" : left === 2 ? "Semifinal" : left === 3 ? "Cuartos de final" : left === 4 ? "Octavos de final" : "Ronda " + (r + 1);
+}
+function levelFor(m) { const rr = R(); if (m.r === "t") return rr >= 3 ? 3 : 2; if (rr === 1) return 2; if (m.r === rr - 1) return 3; return Math.min(3, 1 + Math.floor(m.r * 3 / rr)); }
+
+/* ---------- Elegir pregunta sin repetir ---------- */
+function genQ(level) {
+  const names = Object.keys(GENS).filter(k => Math.abs(GENS[k].l - level) <= 1);
+  for (let tries = 0; tries < 200; tries++) {
+    const k = names[Math.floor(Math.random() * names.length)]; const g = GENS[k].make();
+    if (!S.gen[g.key]) { S.gen[g.key] = 1; return { id: "gen:" + g.key, t: "num", l: GENS[k].l, c: "Cálculo", q: g.q, ans: g.ans, tol: g.tol, unit: g.unit, e: g.e }; }
+  }
+  return null;
+}
+function pickQ(level, lastType) {
+  const rem = remaining();
+  for (const lv of [level, level - 1, level + 1, level - 2, level + 2]) {
+    let pool = rem.filter(q => q.l === lv); if (!pool.length) continue;
+    const varied = pool.filter(q => q.t !== lastType); if (varied.length) pool = varied;
+    const q = pool[Math.floor(Math.random() * pool.length)]; S.used[q.id] = 1; return prep(q);
+  }
+  return null;
+}
+function prep(q) { const x = Object.assign({}, q); if (x.t === "mc") { x.shown = shuffle(x.o); x.correct = x.o[0]; } if (x.t === "ord") { let s = shuffle(x.o); if (s.join() === x.o.join()) s = s.reverse(); x.shown = s; } return x; }
+const limitFor = (q) => S.settings.time + (q.t === "ord" ? 15 : q.t === "num" ? 40 : 0);
+
+/* ---------- Duelo ---------- */
+function startDuel(m) {
+  const turns = []; for (let k = 0; k < S.settings.perPlayer; k++) { turns.push({ p: "a" }, { p: "b" }); }
+  if (Math.random() < .5) turns.forEach(t => t.p = t.p === "a" ? "b" : "a");
+  S.cur = { mid: m.id, level: levelFor(m), turns, idx: 0, stage: "intro", sudden: 0, lastType: null };
+  S.phase = "duel"; save(); render();
+}
+function curTurn() { return S.cur.turns[S.cur.idx]; }
+function showQuestion() {
+  const t = curTurn();
+  if (!t.q) { t.q = pickQ(S.cur.level, S.cur.lastType); if (!t.q) { toast("No quedan preguntas sin usar. Agrega más en la pestaña Banco o vuelve a habilitar las usadas."); return; } S.cur.lastType = t.q.t; }
+  S.cur.stage = "question"; S.cur.t0 = Date.now(); t.pick = []; save(); render();
+}
+let timerH = null;
+function startTimer() {
+  clearInterval(timerH); const t = curTurn(), lim = limitFor(t.q) * 1000;
+  const tick = () => {
+    const left = Math.max(0, lim - (Date.now() - S.cur.t0)); const bar = $("#tbar"), num = $("#tnum");
+    if (bar) bar.style.transform = `scaleX(${left / lim})`; if (num) num.textContent = Math.ceil(left / 1000);
+    if (bar) bar.classList.toggle("low", left < 5000);
+    if (left <= 0) { clearInterval(timerH); answer(null); }
+  };
+  tick(); timerH = setInterval(tick, 100);
+}
+function check(q, given) {
+  if (given === null || given === undefined) return false;
+  if (q.t === "mc") return given === q.correct;
+  if (q.t === "vf") return given === q.a;
+  if (q.t === "ord") return given.join("|") === q.o.join("|");
+  if (q.t === "num") { let x = String(given).trim().replace(/\s/g, ""); if (x.includes(",")) x = x.replace(/\./g, "").replace(",", "."); else if (/^\d{1,3}(\.\d{3})+$/.test(x)) x = x.replace(/\./g, ""); const v = parseFloat(x); return !isNaN(v) && Math.abs(v - q.ans) <= q.tol + 1e-9; }
+  return false;
+}
+function answer(given) {
+  if (!S.cur || S.cur.stage !== "question") return;
+  clearInterval(timerH);
+  const t = curTurn(), lim = limitFor(t.q) * 1000, el = Math.min(lim, Date.now() - S.cur.t0);
+  const ok = check(t.q, given); const pts = ok ? Math.round(1000 * (1 - (el / lim) / 2)) : 0;
+  t.res = { ok, pts, given, time: Math.round(el / 100) / 10 };
+  const m = matchById(S.cur.mid); if (t.p === "a") m.sa += pts; else m.sb += pts;
+  S.cur.stage = "reveal"; beep(ok ? "ok" : "bad"); save(); render();
+}
+function nextTurn() {
+  const c = S.cur, m = matchById(c.mid);
+  if (c.idx < c.turns.length - 1) { c.idx++; c.stage = "intro"; save(); render(); return; }
+  if (m.sa === m.sb) { c.sudden++; const first = Math.random() < .5 ? "a" : "b"; c.turns.push({ p: first, sudden: true }, { p: first === "a" ? "b" : "a", sudden: true }); c.level = Math.min(3, c.level + 1); c.idx++; c.stage = "intro"; save(); render(); return; }
+  c.stage = "result"; beep("win"); save(); render();
+}
+function closeDuel() {
+  const m = matchById(S.cur.mid); setResult(m, m.sa > m.sb ? "a" : "b"); autoResolve();
+  S.cur = null; S.phase = finished() ? "podium" : "bracket"; save(); render();
+}
+function swapQuestion() { const t = curTurn(); clearInterval(timerH); t.q = null; showQuestion(); }
+
+/* ---------- Vistas ---------- */
+const app = () => $("#app");
+function render() {
+  document.body.dataset.phase = S.phase;
+  $("#nav").innerHTML = navHTML();
+  if (S.view === "banco" && S.phase !== "duel") return renderBank();
+  if (S.phase === "setup") return renderSetup();
+  if (S.phase === "bracket") return renderBracket();
+  if (S.phase === "duel") return renderDuel();
+  if (S.phase === "podium") return renderPodium();
+}
+function navHTML() {
+  const rem = remaining().length;
+  const tab = (v, label) => `<button class="tab ${S.view === v ? "on" : ""}" data-view="${v}" ${S.phase === "duel" ? "disabled" : ""}>${label}</button>`;
+  return `<div class="brand"><span class="mk"></span><span>Torneo del talento</span></div>
+    <div class="tabs">${tab("bracket", S.phase === "setup" ? "Inscripción" : "Torneo")}${tab("banco", "Banco")}</div>
+    <div class="meta"><span title="Preguntas fijas sin usar">${rem} preguntas sin usar</span><button class="ghost sm" id="snd" aria-pressed="${S.settings.sound}">${S.settings.sound ? "Sonido on" : "Sonido off"}</button></div>`;
+}
+document.addEventListener("click", (e) => {
+  const v = e.target.closest("[data-view]"); if (v && !v.disabled) { S.view = v.dataset.view; save(); render(); return; }
+  if (e.target.closest("#snd")) { S.settings.sound = !S.settings.sound; save(); render(); }
+});
+
+function renderSetup() {
+  const s = S.settings;
+  app().innerHTML = `<section class="setup">
+    <div class="intro"><div class="eyebrow">Planeación estratégica del talento humano</div>
+      <h1>Torneo <em>del talento</em></h1>
+      <p class="lead">Duelos uno contra uno con preguntas de la exposición. Gana quien sume más puntos: acertar rápido da hasta 1000. La dificultad sube en cada ronda y ninguna pregunta se repite.</p>
+      <ul class="rules"><li><b>3 tipos de pregunta:</b> opción múltiple, verdadero o falso y ordenar.</li><li><b>Empate:</b> muerte súbita con una pregunta más para cada uno.</li><li><b>Premios:</b> final para 1.º y 2.º, y duelo por el 3.º entre los semifinalistas.</li></ul></div>
+    <form class="card" id="fs">
+      <label for="names">Participantes <small>uno por línea · mínimo 2</small></label>
+      <textarea id="names" rows="9" placeholder="Escribe un nombre por línea">${esc(S.draft)}</textarea>
+      <div class="cnt" id="cnt"></div>
+      <div class="row3">
+        <label for="pp">Preguntas por jugador en cada duelo<select id="pp">${[1, 2, 3, 4, 5].map(n => `<option ${n === s.perPlayer ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+        <label for="tt">Segundos por pregunta<select id="tt">${[10, 15, 20, 30, 45].map(n => `<option ${n === s.time ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+      </div>
+      <fieldset class="prizes"><legend>Premios <small>opcional</small></legend>
+        ${[0, 1, 2].map(i => `<label for="pz${i}"><span class="medal m${i}">${i + 1}.º</span><input id="pz${i}" value="${esc(s.prizes[i])}" placeholder="${["Premio del primer puesto", "Premio del segundo puesto", "Premio del tercer puesto"][i]}"></label>`).join("")}
+      </fieldset>
+      <div class="err" id="err" role="alert"></div>
+      <button class="primary" type="submit">Sortear y empezar el torneo</button>
+    </form></section>`;
+  const ta = $("#names");
+  const count = () => { const n = ta.value.split("\n").map(x => x.trim()).filter(Boolean); const u = new Set(n.map(x => x.toLowerCase())); const need = n.length < 2 ? 0 : (n.length - 1 + (n.length >= 4 ? 1 : 0)) * 2 * (+$("#pp").value); const left = remaining().length;
+    $("#cnt").textContent = n.length ? `${n.length} participantes · usarán unas ${need} preguntas · hay ${left} disponibles${u.size < n.length ? " · hay nombres repetidos" : ""}` : `Hay ${left} preguntas disponibles`;
+    $("#cnt").classList.toggle("warn", need > left); return n; };
+  ta.addEventListener("input", () => { S.draft = ta.value; save(); count(); }); $("#pp").addEventListener("change", count); count();
+  $("#fs").addEventListener("submit", (e) => {
+    e.preventDefault(); const n = count(); const u = new Set(n.map(x => x.toLowerCase()));
+    if (n.length < 2) { $("#err").textContent = "Escribe al menos dos participantes."; return; }
+    if (n.length > 64) { $("#err").textContent = "El máximo es 64 participantes."; return; }
+    if (u.size < n.length) { $("#err").textContent = "Hay nombres repetidos: agrega un apellido o inicial para diferenciarlos."; return; }
+    const need = (n.length - 1 + (n.length >= 4 ? 1 : 0)) * 2 * (+$("#pp").value);
+    if (need > remaining().length) { $("#err").textContent = `Este torneo necesita unas ${need} preguntas y solo quedan ${remaining().length} sin usar. Baja las preguntas por jugador, agrega preguntas en la pestaña Banco o vuelve a habilitar las usadas.`; return; }
+    S.settings.perPlayer = +$("#pp").value; S.settings.time = +$("#tt").value; S.settings.prizes = [0, 1, 2].map(i => $("#pz" + i).value.trim());
+    S.players = n; buildBracket(n); S.phase = finished() ? "podium" : "bracket"; S.view = "bracket"; save(); render();
+  });
+}
+
+function matchCard(m) {
+  const cls = m.done ? "done" : ready(m) ? "ready" : "wait";
+  const side = (p, sc, isW) => `<div class="pl ${isW ? "w" : ""} ${p === BYE ? "bye" : ""}"><span class="nm">${esc(pname(p))}</span>${m.done && !m.bye ? `<span class="sc">${sc}</span>` : ""}</div>`;
+  return `<button class="match ${cls}" data-m="${m.id}" ${ready(m) ? "" : "disabled"} aria-label="${esc(pname(m.a))} contra ${esc(pname(m.b))}">${side(m.a, m.sa, m.done && m.w === m.a)}${side(m.b, m.sb, m.done && m.w === m.b)}${ready(m) ? `<span class="go">Jugar</span>` : ""}</button>`;
+}
+function renderBracket() {
+  const nm = nextMatch();
+  app().innerHTML = `<section class="bracket-wrap">
+    <div class="bhead"><div><div class="eyebrow">${S.players.length} participantes · ${S.settings.perPlayer} pregunta${S.settings.perPlayer > 1 ? "s" : ""} por jugador</div><h2>Cuadro del torneo</h2></div>
+      <div class="bact">${nm ? `<button class="primary" id="nextm">Siguiente duelo: ${esc(pname(nm.a))} vs ${esc(pname(nm.b))}</button>` : ""}<button class="ghost" id="reset">Nuevo torneo</button></div></div>
+    <div class="scroll"><div class="bracket" style="--cols:${R()}">${S.rounds.map((rd, r) => `<div class="col"><div class="rname">${roundName(r)}<small>Nivel ${"★".repeat(levelFor(rd[0]))}${"☆".repeat(3 - levelFor(rd[0]))}</small></div><div class="ms">${rd.map(matchCard).join("")}</div></div>`).join("")}
+      ${S.third ? `<div class="col third"><div class="rname">Tercer puesto<small>Perdedores de semifinal</small></div><div class="ms">${matchCard(S.third)}</div></div>` : ""}</div></div>
+    <p class="hint">Toca cualquier duelo marcado con “Jugar” para escoger quién compite ahora.</p>
+    <div class="confirm" id="cf" hidden><span>¿Borrar este torneo y volver a la inscripción? Los nombres se conservan.</span><button class="primary sm" id="cfy">Sí, empezar de nuevo</button><button class="ghost sm" id="cfn">Cancelar</button></div></section>`;
+  app().querySelectorAll("[data-m]").forEach(b => b.onclick = () => startDuel(matchById(b.dataset.m)));
+  const nb = $("#nextm"); if (nb) nb.onclick = () => startDuel(nm);
+  $("#reset").onclick = () => { $("#cf").hidden = false; };
+  $("#cfn").onclick = () => { $("#cf").hidden = true; };
+  $("#cfy").onclick = () => { const keep = { draft: S.players.join("\n"), settings: S.settings, custom: S.custom, used: S.used, gen: S.gen }; S = Object.assign(DEF(), keep); save(); render(); };
+}
+
+function scoreHead(m) {
+  const c = S.cur, t = curTurn();
+  const dots = (side) => c.turns.filter(x => x.p === side).map(x => `<i class="${x.res ? (x.res.ok ? "ok" : "bad") : (x === t ? "now" : "")}"></i>`).join("");
+  return `<div class="duelhead">
+    <div class="fighter ${t.p === "a" ? "active" : ""}"><span class="nm">${esc(pname(m.a))}</span><span class="pts">${m.sa}</span><span class="dots">${dots("a")}</span></div>
+    <div class="vs"><span>${roundName(m.r)}</span><b>VS</b><span>${c.sudden ? "Muerte súbita" : "Turno " + (c.idx + 1) + " de " + c.turns.length}</span></div>
+    <div class="fighter r ${t.p === "b" ? "active" : ""}"><span class="nm">${esc(pname(m.b))}</span><span class="pts">${m.sb}</span><span class="dots">${dots("b")}</span></div></div>`;
+}
+const SH = ["▲", "◆", "●", "■"];
+function renderDuel() {
+  const c = S.cur, m = matchById(c.mid), t = curTurn(), who = pname(m[t.p]);
+  let body = "";
+  if (c.stage === "intro") {
+    body = `<div class="turn"><div class="eyebrow">${t.sudden ? "Muerte súbita · desempate" : "Le toca responder a"}</div><div class="big">${esc(who)}</div><p class="lead">Pasa al frente. La pregunta y el tiempo empiezan cuando toques el botón.</p><button class="primary xl" id="show">Mostrar pregunta</button></div>`;
+  } else if (c.stage === "question" || c.stage === "reveal") {
+    const q = t.q, rev = c.stage === "reveal";
+    let ans = "";
+    if (q.t === "mc") ans = `<div class="opts four">${q.shown.map((o, i) => `<button class="opt c${i} ${rev ? (o === q.correct ? "right" : (t.res.given === o ? "wrong" : "dim")) : ""}" data-v="${esc(o)}" ${rev ? "disabled" : ""}><span class="sh">${SH[i]}</span><span>${esc(o)}</span></button>`).join("")}</div>`;
+    if (q.t === "vf") ans = `<div class="opts two">${[[true, "Verdadero", 3], [false, "Falso", 0]].map(([v, l, ci]) => `<button class="opt c${ci} ${rev ? (v === q.a ? "right" : (t.res.given === v ? "wrong" : "dim")) : ""}" data-vf="${v}" ${rev ? "disabled" : ""}><span class="sh">${v ? "✓" : "✕"}</span><span>${l}</span></button>`).join("")}</div>`;
+    if (q.t === "ord") {
+      const picked = rev ? (t.res.given || []) : (t.pick || []);
+      ans = rev ? `<div class="ordrev"><div><div class="eyebrow">Orden correcto</div><ol>${q.o.map(x => `<li>${esc(x)}</li>`).join("")}</ol></div><div><div class="eyebrow">Respuesta dada</div><ol class="${t.res.ok ? "" : "bad"}">${picked.length ? picked.map(x => `<li>${esc(x)}</li>`).join("") : "<li>Sin respuesta</li>"}</ol></div></div>`
+        : `<div class="ord"><div class="slots">${q.o.map((_, i) => `<div class="slot ${picked[i] ? "full" : ""}"><span class="n">${i + 1}</span><span>${picked[i] ? esc(picked[i]) : ""}</span></div>`).join("")}</div>
+          <div class="pool">${q.shown.map(x => `<button class="chip" data-o="${esc(x)}" ${picked.includes(x) ? "disabled" : ""}>${esc(x)}</button>`).join("")}</div>
+          <div class="ordact"><button class="ghost" id="undo" ${picked.length ? "" : "disabled"}>Deshacer</button><button class="primary" id="okord" ${picked.length === q.o.length ? "" : "disabled"}>Confirmar orden</button></div></div>`;
+    }
+    if (q.t === "num") ans = rev ? `<div class="numrev"><div><div class="eyebrow">Respuesta correcta</div><b>${fmt(q.ans)} ${esc(q.unit)}</b></div><div><div class="eyebrow">Respuesta dada</div><b class="${t.res.ok ? "" : "bad"}">${t.res.given === null || t.res.given === "" ? "Sin respuesta" : esc(t.res.given) + " " + esc(q.unit)}</b></div></div>`
+      : `<form class="numf" id="nf"><label for="nv" class="eyebrow">Tu respuesta (${esc(q.unit)})</label><div class="numrow"><input id="nv" inputmode="decimal" autocomplete="off" placeholder="0"><button class="primary" type="submit">Responder</button></div>
+        <div class="pad">${["7", "8", "9", "4", "5", "6", "1", "2", "3", ",", "0", "⌫"].map(k => `<button type="button" data-k="${k}">${k}</button>`).join("")}</div></form>`;
+    body = `<div class="qcard">
+      <div class="qmeta"><span class="chip-t">${TYPE[q.t]}</span><span>${esc(q.c)}</span><span>Nivel ${"★".repeat(q.l)}${"☆".repeat(3 - q.l)}</span><span class="who">Responde: <b>${esc(who)}</b></span></div>
+      ${rev ? "" : `<div class="timer"><div class="tb"><i id="tbar"></i></div><span id="tnum"></span></div>`}
+      <h2 class="q">${esc(q.q)}</h2>${ans}
+      ${rev ? `<div class="verdict ${t.res.ok ? "ok" : "bad"}"><div class="v1">${t.res.ok ? "¡Correcto!" : (t.res.given === null ? "Se acabó el tiempo" : "Incorrecto")}</div><div class="v2">${t.res.ok ? "+" + t.res.pts + " puntos · " + fmt(t.res.time) + " s" : "0 puntos"}</div><p>${esc(q.e || "")}</p><button class="primary" id="nextt">${c.idx < c.turns.length - 1 || m.sa === m.sb ? "Siguiente turno" : "Ver resultado del duelo"}</button></div>`
+        : `<div class="qfoot"><button class="ghost sm" id="swap">Cambiar pregunta</button></div>`}
+    </div>`;
+  } else if (c.stage === "result") {
+    const wa = m.sa > m.sb, w = wa ? m.a : m.b, l = wa ? m.b : m.a;
+    const isFinal = m.r === R() - 1, isThird = m.r === "t";
+    body = `<div class="turn result"><div class="eyebrow">${isFinal ? "Campeón del torneo" : isThird ? "Tercer puesto" : "Gana el duelo y avanza"}</div><div class="big gold">${esc(pname(w))}</div>
+      <p class="lead">${Math.max(m.sa, m.sb)} contra ${Math.min(m.sa, m.sb)} puntos frente a ${esc(pname(l))}${c.sudden ? ", después de muerte súbita" : ""}.</p>
+      <button class="primary xl" id="close">${isFinal || isThird ? "Continuar" : "Volver al cuadro"}</button></div>`;
+  }
+  app().innerHTML = `<section class="duel">${scoreHead(m)}${body}</section>`;
+  const on = (sel, fn) => { const el = $(sel); if (el) el.onclick = fn; };
+  on("#show", showQuestion); on("#nextt", nextTurn); on("#close", closeDuel); on("#swap", swapQuestion);
+  if (c.stage === "question") {
+    const q = t.q;
+    app().querySelectorAll("[data-v]").forEach(b => b.onclick = () => answer(b.dataset.v));
+    app().querySelectorAll("[data-vf]").forEach(b => b.onclick = () => answer(b.dataset.vf === "true"));
+    if (q.t === "ord") {
+      app().querySelectorAll("[data-o]").forEach(b => b.onclick = () => { t.pick.push(b.dataset.o); beep("tick"); renderDuelKeep(); });
+      on("#undo", () => { t.pick.pop(); renderDuelKeep(); });
+      on("#okord", () => answer(t.pick.slice()));
+    }
+    if (q.t === "num") {
+      const inp = $("#nv"); try { inp.focus({ preventScroll: true }); } catch (e) {}
+      app().querySelectorAll("[data-k]").forEach(b => b.onclick = () => { const k = b.dataset.k; inp.value = k === "⌫" ? inp.value.slice(0, -1) : inp.value + k; });
+      $("#nf").addEventListener("submit", (e) => { e.preventDefault(); answer(inp.value.trim()); });
+    }
+    startTimer();
+  }
+  if (c.stage === "result") confetti(1600);
+}
+function renderDuelKeep() { save(); renderDuel(); }
+
+function renderPodium() {
+  const f = S.rounds[R() - 1][0], first = f.w, second = f.lz;
+  let third = null; if (S.third) third = S.third.done ? S.third.w : null;
+  const pz = S.settings.prizes;
+  const step = (place, p, h) => p === null || p === BYE ? "" : `<div class="step s${place}"><div class="pname">${esc(pname(p))}</div>${pz[place - 1] ? `<div class="prize">${esc(pz[place - 1])}</div>` : ""}<div class="block" style="--h:${h}"><span>${place}.º</span></div></div>`;
+  app().innerHTML = `<section class="podium"><div class="eyebrow">Resultados del torneo</div><h1>Podio <em>final</em></h1>
+    <div class="steps">${step(2, second, 62)}${step(1, first, 100)}${step(3, third, 42)}</div>
+    <div class="pact"><button class="ghost" id="seeb">Ver el cuadro</button><button class="primary" id="again">Nuevo torneo</button></div>
+    <div class="confirm" id="cf" hidden><span>¿Empezar un torneo nuevo? Las preguntas ya usadas no se repetirán.</span><button class="primary sm" id="cfy">Sí, empezar</button><button class="ghost sm" id="cfn">Cancelar</button></div></section>`;
+  $("#seeb").onclick = () => { S.phase = "bracket"; save(); render(); };
+  $("#again").onclick = () => { $("#cf").hidden = false; };
+  $("#cfn").onclick = () => { $("#cf").hidden = true; };
+  $("#cfy").onclick = () => { const keep = { draft: S.players.join("\n"), settings: S.settings, custom: S.custom, used: S.used, gen: S.gen }; S = Object.assign(DEF(), keep); save(); render(); };
+  beep("win"); confetti(3500);
+}
+
+/* ---------- Banco ---------- */
+let bankFilter = { cat: "", txt: "" };
+function renderBank() {
+  const all = allQ(), cats = [...new Set(all.map(q => q.c))];
+  const used = all.filter(q => S.used[q.id]).length;
+  const list = all.filter(q => (!bankFilter.cat || q.c === bankFilter.cat) && (!bankFilter.txt || q.q.toLowerCase().includes(bankFilter.txt.toLowerCase())));
+  const ansTxt = (q) => q.t === "vf" ? (q.a ? "Verdadero" : "Falso") : q.t === "ord" ? q.o.join(" → ") : q.o[0];
+  app().innerHTML = `<section class="bank">
+    <div class="bhead"><div><div class="eyebrow">${all.length} preguntas fijas · ${used} usadas · ${all.length - used} disponibles</div><h2>Banco de preguntas</h2></div>
+      <div class="bact"><button class="ghost" id="resetu" ${used ? "" : "disabled"}>Volver a habilitar las usadas</button></div></div>
+    <div class="bankgrid">
+      <div class="blist"><div class="filters"><label class="sr" for="fc">Tema</label><select id="fc"><option value="">Todos los temas</option>${cats.map(c => `<option ${c === bankFilter.cat ? "selected" : ""}>${esc(c)}</option>`).join("")}</select><label class="sr" for="ft">Buscar</label><input id="ft" placeholder="Buscar en las preguntas" value="${esc(bankFilter.txt)}"></div>
+        <div class="tbl"><table><thead><tr><th>Pregunta</th><th>Tipo</th><th>Nivel</th><th>Respuesta</th><th></th></tr></thead><tbody>
+        ${list.map(q => `<tr class="${S.used[q.id] ? "used" : ""}"><td>${esc(q.q)}<small>${esc(q.c)}</small></td><td>${TYPE[q.t]}</td><td>${"★".repeat(q.l)}</td><td>${esc(ansTxt(q))}</td><td>${S.used[q.id] ? `<span class="tag">Usada</span>` : ""}${q.id.startsWith("c") ? `<button class="ghost sm" data-del="${q.id}">Quitar</button>` : ""}</td></tr>`).join("")}
+        </tbody></table></div></div>
+      <form class="card addq" id="aq"><h3>Agregar una pregunta</h3>
+        <label for="aqt">Tipo<select id="aqt"><option value="mc">Opción múltiple</option><option value="vf">Verdadero o falso</option></select></label>
+        <label for="aqq">Pregunta<textarea id="aqq" rows="3" maxlength="160" required></textarea></label>
+        <div id="aqmc"><label for="aq0">Respuesta correcta<input id="aq0" maxlength="80"></label><label for="aq1">Opción incorrecta 1<input id="aq1" maxlength="80"></label><label for="aq2">Opción incorrecta 2<input id="aq2" maxlength="80"></label><label for="aq3">Opción incorrecta 3<input id="aq3" maxlength="80"></label></div>
+        <div id="aqvf" hidden><label for="aqa">La afirmación es<select id="aqa"><option value="1">Verdadera</option><option value="0">Falsa</option></select></label></div>
+        <div class="row3"><label for="aql">Nivel<select id="aql"><option value="1">★ Fácil</option><option value="2" selected>★★ Medio</option><option value="3">★★★ Difícil</option></select></label><label for="aqc">Tema<input id="aqc" value="Propias" maxlength="30"></label></div>
+        <label for="aqe">Explicación <small>se muestra al revelar</small><input id="aqe" maxlength="160"></label>
+        <div class="err" id="aqerr" role="alert"></div><button class="primary" type="submit">Agregar al banco</button></form>
+    </div></section>`;
+  $("#fc").onchange = (e) => { bankFilter.cat = e.target.value; renderBank(); };
+  $("#ft").oninput = (e) => { bankFilter.txt = e.target.value; const pos = e.target.selectionStart; renderBank(); const f = $("#ft"); f.focus(); f.setSelectionRange(pos, pos); };
+  $("#resetu").onclick = () => { S.used = {}; save(); toast("Todas las preguntas fijas están disponibles otra vez."); render(); };
+  app().querySelectorAll("[data-del]").forEach(b => b.onclick = () => { S.custom = S.custom.filter(q => q.id !== b.dataset.del); save(); renderBank(); });
+  $("#aqt").onchange = (e) => { $("#aqmc").hidden = e.target.value !== "mc"; $("#aqvf").hidden = e.target.value !== "vf"; };
+  $("#aq").addEventListener("submit", (e) => {
+    e.preventDefault(); const t = $("#aqt").value, q = $("#aqq").value.trim();
+    if (!q) { $("#aqerr").textContent = "Escribe la pregunta."; return; }
+    const item = { id: "c" + Date.now(), t, l: +$("#aql").value, c: $("#aqc").value.trim() || "Propias", q, e: $("#aqe").value.trim() };
+    if (t === "mc") { const o = [0, 1, 2, 3].map(i => $("#aq" + i).value.trim()); if (o.some(x => !x)) { $("#aqerr").textContent = "Llena la respuesta correcta y las tres incorrectas."; return; } if (new Set(o).size < 4) { $("#aqerr").textContent = "Las cuatro opciones deben ser distintas."; return; } item.o = o; }
+    else item.a = $("#aqa").value === "1";
+    S.custom.push(item); save(); toast("Pregunta agregada al banco."); renderBank();
+  });
+}
+
+/* ---------- Utilidades ---------- */
+function toast(msg) { let t = $("#toast"); if (!t) { t = document.createElement("div"); t.id = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); } t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 3200); }
+function confetti(ms) {
+  if (reduce) return; const cv = $("#fx"), ctx = cv.getContext("2d"); const W = cv.width = innerWidth, H = cv.height = innerHeight;
+  const cols = ["#f2a93b", "#ffcf7a", "#2fa37f", "#3d7be0", "#e0714f", "#eef4f1"];
+  const ps = Array.from({ length: 160 }, () => ({ x: Math.random() * W, y: -20 - Math.random() * H * .5, vx: (Math.random() - .5) * 3, vy: 2 + Math.random() * 3, r: Math.random() * 6.28, s: 4 + Math.random() * 6, c: cols[Math.floor(Math.random() * cols.length)] }));
+  const end = performance.now() + ms; cancelAnimationFrame(confetti.h);
+  const step = (now) => { ctx.clearRect(0, 0, W, H); ps.forEach(p => { p.x += p.vx; p.y += p.vy; p.r += .1; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); ctx.restore(); }); if (now < end) confetti.h = requestAnimationFrame(step); else ctx.clearRect(0, 0, W, H); };
+  confetti.h = requestAnimationFrame(step);
+}
+addEventListener("keydown", (e) => {
+  if (!S.cur || e.target.closest("input,textarea,select")) return;
+  const c = S.cur;
+  if (c.stage === "intro" && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); showQuestion(); }
+  else if (c.stage === "reveal" && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); nextTurn(); }
+  else if (c.stage === "question") { const t = curTurn(); if (t.q.t === "mc" && /^[1-4]$/.test(e.key)) answer(t.q.shown[+e.key - 1]); if (t.q.t === "vf" && (e.key === "v" || e.key === "f")) answer(e.key === "v"); }
+});
+
+// Si se recarga en mitad de una pregunta, el turno vuelve a la pantalla de inicio con la misma pregunta.
+if (S.cur && S.cur.stage === "question") S.cur.stage = "intro";
+if (S.phase === "duel" && !S.cur) S.phase = "bracket";
+render();
+})();
+
+</script>
+
+</body></html>
