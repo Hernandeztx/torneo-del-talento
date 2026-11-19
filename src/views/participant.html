@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0a302b">
+  <meta name="description" content="Torneo del Talento — Interfaz del Participante para duelos de conocimiento en tiempo real.">
+  <title>Participar | Torneo del Talento</title>
+
+  <!-- Fuentes e Iconos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Estilos del Sistema -->
+  <link rel="stylesheet" href="/public/css/theme.css">
+  <link rel="stylesheet" href="/public/css/participant.css">
+</head>
+<body class="bg-blueprint">
+
+  <div class="participant-shell">
+    <!-- Encabezado Fijo -->
+    <header class="p-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 20px;">⚡</span>
+        <span style="font-family: var(--f-head); font-weight: 800; font-size: 15px; letter-spacing: 0.05em; color: var(--gold);">
+          TORNEO DEL TALENTO
+        </span>
+      </div>
+      <div class="actions">
+        <button id="sound-toggle" class="btn-icon" type="button" aria-label="Alternar sonido" title="Sonido">🔊</button>
+        <span id="connection-badge" class="badge badge-disconnected">
+          <span class="badge-dot"></span> Desconectado
+        </span>
+      </div>
+    </header>
+
+    <!-- =====================================================================
+         PANTALLA 1: INGRESO (CÓDIGO Y NOMBRE)
+         ===================================================================== -->
+    <main id="screen-join" class="screen active">
+      <div class="join-hero">
+        <h1 class="title">TORNEO DEL <em>TALENTO</em></h1>
+        <p class="subtitle">Duelos de conocimiento en tiempo real. Ingresa el código del torneo para competir.</p>
+      </div>
+
+      <div class="card join-card">
+        <form id="join-form" autocomplete="off">
+          <div class="form-group">
+            <label for="input-code" class="form-label">CÓDIGO DEL TORNEO</label>
+            <input
+              id="input-code"
+              class="form-input code-input"
+              type="text"
+              name="code"
+              maxlength="8"
+              placeholder="XXXX"
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="input-name" class="form-label">TU NOMBRE O APODO</label>
+            <input
+              id="input-name"
+              class="form-input"
+              type="text"
+              name="name"
+              maxlength="24"
+              placeholder="Ej: Ing. Laura"
+              autocomplete="name"
+              required
+            >
+          </div>
+
+          <div id="join-error" class="form-error" style="min-height: 20px; margin-bottom: 12px; color: var(--bad); font-size: 14px; text-align: center; font-weight: 600;"></div>
+
+          <button id="btn-join" class="btn btn-primary btn-block" type="submit">
+            ¡ENTRAR AL TORNEO!
+          </button>
+        </form>
+      </div>
+    </main>
+
+    <!-- =====================================================================
+         PANTALLA 2: SALA DE ESPERA (LOBBY)
+         ===================================================================== -->
+    <section id="screen-lobby" class="screen">
+      <div class="card lobby-card">
+        <div id="lobby-avatar" class="lobby-avatar">P</div>
+        <h2 id="lobby-name" class="lobby-name">Participante</h2>
+        <div class="lobby-status">
+          Torneo: <span id="lobby-code" class="badge badge-gold" style="font-size: 14px; letter-spacing: 0.1em;">----</span>
+        </div>
+        <div class="waiting-pulse">
+          <span class="badge-dot badge-pulse" style="background: var(--gold);"></span>
+          <span>Esperando que el organizador inicie el torneo...</span>
+        </div>
+      </div>
+
+      <div class="participants-box">
+        <div class="participants-header">
+          <span>JUGADORES EN SALA</span>
+          <span id="lobby-count" class="badge">0 inscritos</span>
+        </div>
+        <div id="participants-list" class="participants-list">
+          <!-- Participantes inyectados dinámicamente -->
+        </div>
+      </div>
+
+      <button id="btn-leave-lobby" class="btn btn-ghost btn-block" style="margin-top: 18px;" type="button">
+        Salir del torneo
+      </button>
+    </section>
+
+    <!-- =====================================================================
+         PANTALLA 3: MODO ESPECTADOR (EN ESPERA DE DUELO)
+         ===================================================================== -->
+    <section id="screen-spectator" class="screen">
+      <div class="card spectator-box">
+        <div class="spectator-badge">Modo Espectador</div>
+        <h2 style="font-family: var(--f-head); margin-top: 8px;">Duelo en Curso</h2>
+        <p style="color: var(--sage); margin-bottom: 18px; font-size: 14px;">
+          Tu turno llegará pronto. Observa la batalla en la pantalla principal:
+        </p>
+
+        <div class="duel-banner">
+          <div id="spec-fighter-a" class="fighter-name">Jugador A</div>
+          <div class="vs-tag">VS</div>
+          <div id="spec-fighter-b" class="fighter-name">Jugador B</div>
+        </div>
+
+        <div class="waiting-pulse" style="margin-top: 24px;">
+          <span class="badge-dot badge-pulse" style="background: var(--gold);"></span>
+          <span>Prepárate cuando sea tu turno...</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         PANTALLA 4: PREGUNTA Y BOTONERA KAHOOT
+         ===================================================================== -->
+    <section id="screen-question" class="screen">
+      <div class="question-header">
+        <div class="timer-bar-wrap">
+          <div id="timer-bar" class="timer-bar"></div>
+        </div>
+        <div class="question-meta">
+          <span><span id="q-category">General</span> • Nivel <span id="q-level">★</span></span>
+          <span id="time-left" class="time-left">20s</span>
+        </div>
+      </div>
+
+      <div id="q-text" class="question-text">
+        Cargando pregunta...
+      </div>
+
+      <!-- Contenedor dinámico de opciones táctiles (MC 4 botones, VF 2 botones, Ordenamiento, Cálculo) -->
+      <div id="options-container" class="options-grid"></div>
+    </section>
+
+    <!-- =====================================================================
+         PANTALLA 5: RESPUESTA ENVIADA (BLOQUEADA)
+         ===================================================================== -->
+    <section id="screen-answered" class="screen">
+      <div class="card answered-card">
+        <div class="answered-spinner"></div>
+        <h2 class="answered-title">¡Respuesta Enviada!</h2>
+        <p id="answered-time-text" class="answered-time">
+          Esperando a tu oponente y el cierre de la ronda...
+        </p>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         PANTALLA 6: VEREDICTO Y EXPLICACIÓN
+         ===================================================================== -->
+    <section id="screen-verdict" class="screen">
+      <div id="verdict-card" class="verdict-card ok">
+        <div id="verdict-title" class="verdict-badge">¡CORRECTO!</div>
+        <div id="verdict-points" class="verdict-points">+1000 pts</div>
+        <div id="verdict-explanation" class="verdict-expl">
+          Explicación técnica de la pregunta.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Contenedor global de notificaciones toast -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts del Sistema -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/public/js/audio.js"></script>
+  <script src="/public/js/confetti.js"></script>
+  <script src="/public/js/participant.js"></script>
+</body>
+</html>

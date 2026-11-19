@@ -79,7 +79,14 @@ function verifyAnswer(question, givenAnswer) {
   }
 
   if (question.type === "vf") {
-    return Boolean(givenAnswer) === Boolean(question.correctAnswer);
+    // Comparación segura: normalizar ambos lados a boolean puro.
+    // Esto tolera correctAnswer como boolean true/false o string "true"/"false"
+    // y givenAnswer como boolean (lo que envía el cliente) o string.
+    const correctBool = question.correctAnswer === true ||
+      String(question.correctAnswer).toLowerCase() === "true";
+    const givenBool = givenAnswer === true ||
+      String(givenAnswer).toLowerCase() === "true";
+    return correctBool === givenBool;
   }
 
   if (question.type === "ord") {

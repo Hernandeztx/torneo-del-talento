@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a302b">
+  <meta name="description" content="Torneo del Talento — Pantalla de Proyección Pública y Auditorio en Tiempo Real">
+  <title>Proyección | Torneo del Talento</title>
+
+  <!-- Fuentes e Iconos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;900&display=swap" rel="stylesheet">
+
+  <!-- Estilos del Sistema -->
+  <link rel="stylesheet" href="/public/css/theme.css">
+  <link rel="stylesheet" href="/public/css/projection.css">
+</head>
+<body class="projection-body bg-blueprint">
+
+  <div class="proj-container">
+    <!-- =====================================================================
+         ENCABEZADO FIJO DE PROYECCIÓN
+         ===================================================================== -->
+    <header class="proj-header">
+      <div class="proj-brand">
+        <span class="proj-brand-icon">⚡</span>
+        <div>
+          <div class="proj-brand-title">TORNEO DEL TALENTO</div>
+          <div id="proj-header-name" class="proj-tournament-name">Pantalla de Auditorio</div>
+        </div>
+      </div>
+
+      <div class="proj-header-right">
+        <div id="proj-header-code" class="proj-code-badge">
+          SALA: <b>----</b>
+        </div>
+        <button id="btn-proj-sound" class="btn-proj-control" type="button" title="Silenciar / Activar Sonido">🔊</button>
+        <button id="btn-proj-fullscreen" class="btn-proj-control" type="button" title="Pantalla Completa">⛶</button>
+        <span id="proj-connection-badge" class="badge badge-disconnected">
+          <span class="badge-dot"></span> Desconectado
+        </span>
+      </div>
+    </header>
+
+    <!-- =====================================================================
+         ÁREA PRINCIPAL DE CONTENIDO DINÁMICO
+         ===================================================================== -->
+    <main class="proj-main">
+
+      <!-- ESTADO 0: SELECTOR DE SALA (CUANDO NO SE INDICA CÓDIGO EN LA URL) -->
+      <section id="panel-code-select" class="proj-panel active">
+        <div class="code-entry-box">
+          <h2>Ingresar a la Sala de Proyección</h2>
+          <p style="color: var(--sage); font-size: 18px; margin: 0 0 20px 0;">
+            Introduce el código del torneo para proyectar el auditorio en vivo:
+          </p>
+          <form id="code-entry-form" autocomplete="off">
+            <input
+              id="code-entry-input"
+              class="code-entry-input"
+              type="text"
+              maxlength="8"
+              placeholder="XXXX"
+              autofocus
+              required
+            >
+            <div id="code-entry-error" style="color: var(--bad); font-weight: 700; min-height: 24px; margin-bottom: 16px;"></div>
+            <button class="btn btn-primary" style="font-size: 20px; padding: 14px 40px;" type="submit">
+              CONECTAR PANTALLA
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ESTADO A: LOBBY DE ESPERA (QR + ROSTER) -->
+      <section id="panel-lobby" class="proj-panel">
+        <div class="lobby-grid">
+          <!-- Columna QR e Instrucciones -->
+          <div class="qr-join-card">
+            <div class="qr-badge">ACCESO AL TORNEO</div>
+            <div class="qr-box-wrap">
+              <img id="lobby-qr-img" class="qr-image" src="" alt="Código QR para unirse">
+            </div>
+            <div class="qr-instructions">
+              <div class="url-label">Ingresa desde tu teléfono a:</div>
+              <div style="font-family: var(--f-mono); font-weight: 700; font-size: clamp(16px, 1.4vw, 22px); color: var(--gold-2); margin-bottom: 8px;">
+                torneo.adminpage.space/jugar
+              </div>
+              <div class="code-label">O usa el código de sala:</div>
+              <span id="lobby-code-big" class="code-big">----</span>
+            </div>
+          </div>
+
+          <!-- Columna Mosaico de Participantes -->
+          <div class="lobby-roster-card">
+            <div class="roster-header">
+              <h2 class="roster-title">
+                <span>Participantes en Sala</span>
+              </h2>
+              <span id="lobby-roster-count" class="roster-count">0 inscritos</span>
+            </div>
+
+            <div id="lobby-roster-grid" class="roster-grid">
+              <!-- Participantes inyectados dinámicamente -->
+            </div>
+
+            <div id="lobby-roster-empty" class="roster-empty-notice">
+              <div class="pulse-circle">👥</div>
+              <div style="font-weight: 700; color: #fff; margin-bottom: 6px;">Esperando competidores...</div>
+              <div style="font-size: 15px;">Escanea el código QR para ingresar a la sala</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ESTADO B: PREPARACIÓN Y TRANSICIÓN AL COMIENZO -->
+      <section id="panel-prep" class="proj-panel">
+        <div class="prep-stage">
+          <div class="prep-badge">¡COMIENZA LA COMPETENCIA!</div>
+          <h1 class="prep-title">TORNEO DEL TALENTO</h1>
+          <p class="prep-subtitle">Los competidores han sido emparejados. Preparando el primer duelo en vivo...</p>
+          <div style="display: flex; justify-content: center; margin-top: 30px;">
+            <div class="badge-dot badge-pulse" style="width: 20px; height: 20px; background: var(--gold);"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ESTADO C: DUELO 1 VS 1 (MATCH ARENA) -->
+      <section id="panel-duel" class="proj-panel">
+        <div class="duel-arena">
+          <div class="duel-stage-header">
+            <span id="duel-round-name" class="duel-round-pill">Ronda 1</span>
+          </div>
+
+          <div class="duel-fighters-row">
+            <!-- Peleador A -->
+            <div class="fighter-pod player-a">
+              <div id="fighter-a-avatar" class="fighter-avatar">A</div>
+              <h2 id="fighter-a-name" class="fighter-name-display">Competidor A</h2>
+              <div id="fighter-a-score" class="fighter-score-tag">0 pts</div>
+              <div id="fighter-a-status" class="fighter-live-status ready">En posición</div>
+            </div>
+
+            <!-- VS Central -->
+            <div class="vs-divider">
+              <div class="vs-circle">VS</div>
+            </div>
+
+            <!-- Peleador B -->
+            <div class="fighter-pod player-b">
+              <div id="fighter-b-avatar" class="fighter-avatar">B</div>
+              <h2 id="fighter-b-name" class="fighter-name-display">Competidor B</h2>
+              <div id="fighter-b-score" class="fighter-score-tag">0 pts</div>
+              <div id="fighter-b-status" class="fighter-live-status ready">En posición</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ESTADO D: PREGUNTA EN VIVO Y CRONÓMETRO -->
+      <section id="panel-question" class="proj-panel">
+        <div class="live-question-arena">
+          <!-- Metadatos y Cronómetro -->
+          <div>
+            <div class="proj-timer-wrap">
+              <div id="proj-timer-bar" class="proj-timer-bar"></div>
+            </div>
+            <div class="question-top-bar">
+              <span id="proj-q-category" class="question-category-tag">General</span>
+              <span id="proj-time-clock" class="question-digital-clock">20s</span>
+            </div>
+
+            <!-- Enunciado de la Pregunta -->
+            <div class="proj-question-box">
+              <h2 id="proj-q-text" class="proj-question-text">¿Pregunta en pantalla?</h2>
+            </div>
+          </div>
+
+          <!-- Opciones de Respuesta -->
+          <div id="proj-options-grid" class="proj-options-grid four">
+            <!-- Inyectadas dinámicamente -->
+          </div>
+
+          <!-- Barra Inferior de Estado de Respuestas en Vivo -->
+          <div class="duel-bottom-strip">
+            <div id="strip-player-a" class="strip-player" data-id="">
+              <div class="dot-status"></div>
+              <span id="strip-player-a-name" class="name">Competidor A</span>
+            </div>
+            <div style="color: var(--sage); font-family: var(--f-mono); font-size: 13px;">TIEMPO REAL</div>
+            <div id="strip-player-b" class="strip-player" data-id="">
+              <div class="dot-status"></div>
+              <span id="strip-player-b-name" class="name">Competidor B</span>
+            </div>
+          </div>
+
+          <!-- Panel de Revelación y Explicación Técnica -->
+          <div id="proj-reveal-panel" class="reveal-modal-panel" style="display: none;">
+            <div class="reveal-title">RESPUESTA CORRECTA</div>
+            <p id="proj-reveal-explanation" class="reveal-text">Explicación técnica del principio evaluado.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ESTADO F: CUADRO DE ELIMINATORIAS (BRACKET) -->
+      <section id="panel-bracket" class="proj-panel">
+        <div class="bracket-stage">
+          <h2 class="bracket-title">CUADRO DE ELIMINACIÓN DEL TORNEO</h2>
+          <div id="bracket-viewport" class="bracket-viewport">
+            <!-- Columnas del Bracket inyectadas dinámicamente -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ESTADO G: PODIO FINAL -->
+      <section id="panel-podium" class="proj-panel">
+        <div class="podium-stage">
+          <h1 class="podium-title">¡CAMPEONES DEL TALENTO!</h1>
+
+          <div class="podium-pillars-wrap">
+            <!-- 2° Lugar -->
+            <div class="podium-col rank-2">
+              <div class="podium-winner-info">
+                <div class="podium-avatar">🥈</div>
+                <h3 id="podium-p2-name" class="podium-winner-name">Segundo Puesto</h3>
+                <div id="podium-p2-points" class="podium-winner-points">Subcampeón</div>
+              </div>
+              <div class="podium-pedestal">2</div>
+            </div>
+
+            <!-- 1° Lugar -->
+            <div class="podium-col rank-1">
+              <div class="podium-winner-info">
+                <div class="podium-avatar">👑</div>
+                <h3 id="podium-p1-name" class="podium-winner-name">Gran Campeón</h3>
+                <div id="podium-p1-points" class="podium-winner-points">Primer Puesto</div>
+              </div>
+              <div class="podium-pedestal">1</div>
+            </div>
+
+            <!-- 3° Lugar -->
+            <div class="podium-col rank-3">
+              <div class="podium-winner-info">
+                <div class="podium-avatar">🥉</div>
+                <h3 id="podium-p3-name" class="podium-winner-name">Tercer Puesto</h3>
+                <div id="podium-p3-points" class="podium-winner-points">Tercer Lugar</div>
+              </div>
+              <div class="podium-pedestal">3</div>
+            </div>
+          </div>
+
+          <!-- 4° Lugar — fila debajo del podio -->
+          <div id="podium-p4-row" class="podium-fourth-row" style="display:none; margin-top:24px; text-align:center;">
+            <div class="podium-avatar" style="font-size:28px; display:inline-block;">🏅</div>
+            <div style="display:inline-block; vertical-align:middle; margin-left:10px;">
+              <span style="font-size:14px; opacity:0.7;">4° Lugar</span><br>
+              <strong id="podium-p4-name" style="font-size:20px;"></strong>
+              <span id="podium-p4-points" style="font-size:13px; opacity:0.6; margin-left:8px;"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Contenedor global de notificaciones toast -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts del Sistema -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/public/js/audio.js"></script>
+  <script src="/public/js/confetti.js"></script>
+  <script src="/public/js/projection.js"></script>
+</body>
+</html>

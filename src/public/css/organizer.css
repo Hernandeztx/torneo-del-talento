@@ -1,0 +1,387 @@
+/* ==========================================================================
+   TORNEO DEL TALENTO — PANEL DEL ORGANIZADOR (/organizador)
+   Panel privado de administración y control del torneo multijugador
+   ========================================================================== */
+
+.organizer-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg);
+  color: var(--mist);
+  font-family: var(--f-body);
+}
+
+/* ==========================================================================
+   CABECERA DEL PANEL
+   ========================================================================== */
+.org-navbar {
+  background: var(--panel);
+  border-bottom: 1px solid var(--line-2);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+}
+
+.org-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.org-brand-icon {
+  font-size: 26px;
+  filter: drop-shadow(0 0 8px var(--gold-glow));
+}
+
+.org-brand-text h1 {
+  font-family: var(--f-head);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--gold);
+  margin: 0;
+}
+
+.org-brand-text span {
+  font-size: 12px;
+  color: var(--sage);
+  font-family: var(--f-mono);
+  text-transform: uppercase;
+}
+
+.org-navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.org-session-tag {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-family: var(--f-mono);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.org-session-tag b {
+  color: var(--gold-2);
+}
+
+/* ==========================================================================
+   LAYOUT PRINCIPAL: SIDEBAR + CONTENIDO
+   ========================================================================== */
+.org-layout {
+  display: flex;
+  flex: 1;
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  gap: 24px;
+}
+
+@media (max-width: 900px) {
+  .org-layout {
+    flex-direction: column;
+    padding: 16px;
+  }
+}
+
+/* Sidebar de Navegación */
+.org-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@media (max-width: 900px) {
+  .org-sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+}
+
+.org-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--sage);
+  font-family: var(--f-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.org-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--mist);
+}
+
+.org-nav-btn.active {
+  background: rgba(242, 169, 59, 0.15);
+  border-color: var(--line-gold);
+  color: var(--gold-2);
+}
+
+.org-nav-btn .icon {
+  font-size: 18px;
+}
+
+/* Contenido Principal */
+.org-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.org-tab-panel {
+  display: none;
+  flex-direction: column;
+  gap: 20px;
+  animation: orgFadeIn 0.25s ease-out;
+}
+
+.org-tab-panel.active {
+  display: flex;
+}
+
+@keyframes orgFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   TARJETAS Y MÉTRICAS
+   ========================================================================== */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.metric-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--line);
+}
+
+.metric-card.gold::before { background: var(--gold); }
+.metric-card.green::before { background: var(--ok); }
+.metric-card.blue::before { background: #2f6fd6; }
+
+.metric-label {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--sage);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.metric-value {
+  font-family: var(--f-head);
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.metric-sub {
+  font-size: 12px;
+  color: var(--sage-dim);
+}
+
+/* ==========================================================================
+   TABLAS Y LISTAS
+   ========================================================================== */
+.org-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.org-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.org-card-title {
+  font-family: var(--f-head);
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+}
+
+.org-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.org-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--sage);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--line);
+}
+
+.org-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--mist);
+}
+
+.org-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ==========================================================================
+   FORMULARIO DE CONFIGURACIÓN DE TORNEO
+   ========================================================================== */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-help {
+  font-size: 12px;
+  color: var(--sage-dim);
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   MODAL DE CONFIRMACIÓN
+   ========================================================================== */
+.org-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.org-modal-overlay.active {
+  display: flex;
+}
+
+.org-modal {
+  background: var(--ink);
+  border: 1px solid var(--line-gold);
+  border-radius: 18px;
+  padding: 28px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.7);
+  animation: orgModalZoom 0.2s ease-out;
+}
+
+@keyframes orgModalZoom {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.org-modal h3 {
+  font-family: var(--f-head);
+  font-size: 20px;
+  margin: 0 0 10px 0;
+  color: var(--gold);
+}
+
+.org-modal p {
+  font-size: 14px;
+  color: var(--sage);
+  line-height: 1.45;
+  margin: 0 0 20px 0;
+}
+
+.org-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ==========================================================================
+   PREVISUALIZACIÓN DE CUADRO (BRACKET)
+   ========================================================================== */
+.bracket-preview-box {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.bracket-preview-col {
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bracket-preview-node {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.bracket-preview-node.completed {
+  border-color: var(--ok);
+}

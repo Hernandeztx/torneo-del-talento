@@ -246,6 +246,12 @@ async function startTournament({ code, adminSecretOrToken }) {
   room.thirdMatch = bracket.thirdMatch;
   room.status = "active";
 
+  // Poblar room.matches Map para indexación rápida por match_id
+  const allGeneratedMatches = bracket.rounds.flat().concat(bracket.thirdMatch ? [bracket.thirdMatch] : []);
+  for (const m of allGeneratedMatches) {
+    room.matches.set(m.id, m);
+  }
+
   // Persistir el cuadro y cambio de estado en PostgreSQL
   if (db.getStatus().connected && !room.id.startsWith("mem-")) {
     await db.withTransaction(async (client) => {

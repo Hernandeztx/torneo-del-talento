@@ -65,7 +65,14 @@ router.post("/tournament/create", async (req, res) => {
       adminSecret
     });
 
-    const joinUrl = `${env.PUBLIC_URL}/jugar?code=${code}`;
+    // Detectar host dinámico a partir de la petición para permitir acceso desde IP local (móviles) o proxy
+    const hostHeader = req.get("host");
+    const protocol = req.protocol || "http";
+    const baseUrl = (!env.isProduction() && hostHeader) 
+      ? `${protocol}://${hostHeader}` 
+      : env.PUBLIC_URL;
+
+    const joinUrl = `${baseUrl}/jugar?code=${code}`;
     const qrDataUrl = await QRCode.toDataURL(joinUrl, {
       margin: 1,
       color: {
@@ -92,7 +99,13 @@ router.post("/tournament/create", async (req, res) => {
  */
 router.get("/tournament/:code/qr", async (req, res) => {
   const code = (req.params.code || "").toUpperCase();
-  const joinUrl = `${env.PUBLIC_URL}/jugar?code=${code}`;
+  const hostHeader = req.get("host");
+  const protocol = req.protocol || "http";
+  const baseUrl = (!env.isProduction() && hostHeader) 
+    ? `${protocol}://${hostHeader}` 
+    : env.PUBLIC_URL;
+
+  const joinUrl = `${baseUrl}/jugar?code=${code}`;
 
   try {
     const format = req.query.format || "png";

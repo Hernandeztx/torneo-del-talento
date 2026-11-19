@@ -1,0 +1,1052 @@
+/* ==========================================================================
+   TORNEO DEL TALENTO — PANTALLA DE PROYECCIÓN PÚBLICA (/proyeccion)
+   Diseño de Alta Fidelidad para Pantallas Grandes, Proyectores y Auditorios
+   Formato 16:9 optimizado para 1920x1080, 1366x768 y 1280x720
+   ========================================================================== */
+
+:root {
+  --proj-max-w: 1800px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body.projection-body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: var(--bg);
+  color: var(--mist);
+  font-family: var(--f-body);
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Contenedor Principal de la Proyección */
+.proj-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  max-width: var(--proj-max-w);
+  margin: 0 auto;
+  padding: 1.5vh 2.5vw 2vh 2.5vw;
+}
+
+/* ==========================================================================
+   ENCABEZADO SUPERIOR DE LA PROYECCIÓN
+   ========================================================================== */
+.proj-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1.5vh;
+  border-bottom: 1px solid var(--line-2);
+  flex-shrink: 0;
+  gap: 20px;
+}
+
+.proj-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.proj-brand-icon {
+  font-size: clamp(24px, 2.5vw, 36px);
+  filter: drop-shadow(0 0 10px var(--gold-glow));
+}
+
+.proj-brand-title {
+  font-family: var(--f-head);
+  font-size: clamp(18px, 1.8vw, 26px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+  line-height: 1.1;
+}
+
+.proj-tournament-name {
+  font-family: var(--f-body);
+  font-size: clamp(14px, 1.2vw, 18px);
+  color: var(--sage);
+  font-weight: 500;
+  max-width: 450px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.proj-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.proj-code-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(242, 169, 59, 0.15);
+  border: 1px solid var(--line-gold);
+  border-radius: 10px;
+  padding: 6px 16px;
+  font-family: var(--f-mono);
+  font-size: clamp(14px, 1.3vw, 20px);
+  color: var(--gold-2);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.proj-code-badge b {
+  font-size: 1.25em;
+  color: #ffffff;
+}
+
+.btn-proj-control {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--line);
+  color: var(--mist);
+  width: clamp(36px, 3vw, 44px);
+  height: clamp(36px, 3vw, 44px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: clamp(16px, 1.3vw, 20px);
+  transition: all 0.2s;
+}
+
+.btn-proj-control:hover {
+  background: rgba(242, 169, 59, 0.2);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* ==========================================================================
+   ÁREA DE CONTENIDO DINÁMICO (PANELES)
+   ========================================================================== */
+.proj-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  margin-top: 1.5vh;
+}
+
+.proj-panel {
+  display: none;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  animation: projFadeIn 0.3s ease-out;
+}
+
+.proj-panel.active {
+  display: flex;
+}
+
+@keyframes projFadeIn {
+  from { opacity: 0; transform: scale(0.99); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ==========================================================================
+   ESTADO 0: SELECTOR / INGRESO DE SALA (SI NO HAY CÓDIGO EN LA URL)
+   ========================================================================== */
+.code-entry-box {
+  margin: auto;
+  max-width: 580px;
+  width: 100%;
+  background: var(--panel);
+  border: 2px solid var(--line-gold);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.code-entry-box h2 {
+  font-family: var(--f-head);
+  font-size: 32px;
+  color: var(--gold);
+  margin-top: 0;
+}
+
+.code-entry-input {
+  width: 100%;
+  max-width: 320px;
+  padding: 16px;
+  font-family: var(--f-mono);
+  font-size: 32px;
+  text-align: center;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background: var(--ink);
+  border: 2px solid var(--sage);
+  border-radius: 12px;
+  color: #fff;
+  margin: 20px 0;
+}
+
+.code-entry-input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 15px var(--gold-glow);
+}
+
+/* ==========================================================================
+   ESTADO A: LOBBY DE ESPERA (QR + MOSAICO DE JUGADORES)
+   ========================================================================== */
+.lobby-grid {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 3vw;
+  height: 100%;
+  align-items: stretch;
+}
+
+@media (max-width: 1100px) {
+  .lobby-grid {
+    grid-template-columns: 340px 1fr;
+    gap: 20px;
+  }
+}
+
+/* Tarjeta Izquierda del Código QR */
+.qr-join-card {
+  background: var(--panel);
+  border: 2px solid var(--line-gold);
+  border-radius: 24px;
+  padding: clamp(20px, 2.5vh, 36px) 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.qr-join-card .qr-badge {
+  background: rgba(242, 169, 59, 0.15);
+  color: var(--gold);
+  font-family: var(--f-mono);
+  font-size: clamp(12px, 1.1vw, 15px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line-gold);
+  margin-bottom: 12px;
+}
+
+.qr-box-wrap {
+  background: #ffffff;
+  padding: 14px;
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-image {
+  width: clamp(210px, 18vw, 290px);
+  height: clamp(210px, 18vw, 290px);
+  object-fit: contain;
+  display: block;
+}
+
+.qr-instructions {
+  margin-top: 10px;
+}
+
+.qr-instructions .url-label {
+  font-family: var(--f-mono);
+  font-size: clamp(14px, 1.2vw, 17px);
+  color: var(--sage);
+  margin-bottom: 6px;
+}
+
+.qr-instructions .code-label {
+  font-family: var(--f-head);
+  font-size: clamp(14px, 1.2vw, 16px);
+  color: var(--mist);
+}
+
+.qr-instructions .code-big {
+  font-family: var(--f-mono);
+  font-size: clamp(34px, 3.5vw, 48px);
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  display: block;
+  text-shadow: 0 0 20px var(--gold-glow);
+}
+
+/* Columna Derecha: Mosaico de Participantes */
+.lobby-roster-card {
+  background: rgba(4, 19, 15, 0.55);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: clamp(20px, 2.5vh, 32px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.roster-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.roster-title {
+  font-family: var(--f-head);
+  font-size: clamp(20px, 2vw, 28px);
+  font-weight: 800;
+  color: var(--mist);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.roster-count {
+  font-family: var(--f-mono);
+  font-size: clamp(16px, 1.4vw, 22px);
+  font-weight: 700;
+  padding: 6px 18px;
+  border-radius: 999px;
+  background: rgba(47, 163, 127, 0.2);
+  border: 1px solid var(--ok);
+  color: #7fe0bc;
+}
+
+.roster-grid {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 14px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.roster-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.roster-grid::-webkit-scrollbar-thumb {
+  background: var(--line-2);
+  border-radius: 3px;
+}
+
+.player-card-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 18px;
+  font-family: var(--f-body);
+  font-size: clamp(15px, 1.3vw, 20px);
+  font-weight: 700;
+  color: var(--mist);
+  animation: chipPopIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.player-card-chip:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.player-card-chip .chip-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--f-head);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+@keyframes chipPopIn {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.roster-empty-notice {
+  margin: auto;
+  text-align: center;
+  color: var(--sage);
+  font-size: clamp(18px, 1.6vw, 24px);
+}
+
+.roster-empty-notice .pulse-circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(242, 169, 59, 0.15);
+  border: 2px dashed var(--gold);
+  margin: 0 auto 16px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  animation: spinSlow 12s linear infinite;
+}
+
+@keyframes spinSlow {
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   ESTADO B: PREPARACIÓN Y TRANSICIÓN AL COMIENZO
+   ========================================================================== */
+.prep-stage {
+  margin: auto;
+  text-align: center;
+  max-width: 900px;
+}
+
+.prep-badge {
+  display: inline-block;
+  padding: 8px 24px;
+  border-radius: 999px;
+  background: rgba(242, 169, 59, 0.18);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: var(--f-mono);
+  font-size: clamp(14px, 1.3vw, 20px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 24px;
+}
+
+.prep-title {
+  font-family: var(--f-head);
+  font-size: clamp(38px, 4.5vw, 68px);
+  font-weight: 900;
+  line-height: 1.1;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+}
+
+.prep-subtitle {
+  font-size: clamp(20px, 2vw, 28px);
+  color: var(--sage);
+  margin: 0 0 36px 0;
+}
+
+/* ==========================================================================
+   ESTADO C: ENFRENTAMIENTO 1 VS 1 (DUEL ARENA)
+   ========================================================================== */
+.duel-arena {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+}
+
+.duel-stage-header {
+  text-align: center;
+  margin-bottom: 3vh;
+}
+
+.duel-round-pill {
+  display: inline-block;
+  padding: 8px 26px;
+  background: rgba(47, 111, 214, 0.25);
+  border: 1px solid #2f6fd6;
+  border-radius: 999px;
+  color: #8bb3f8;
+  font-family: var(--f-mono);
+  font-size: clamp(14px, 1.3vw, 18px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.duel-fighters-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 3vw;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.fighter-pod {
+  background: var(--panel);
+  border: 2px solid var(--line-2);
+  border-radius: 28px;
+  padding: clamp(28px, 4vh, 48px) 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.45);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.fighter-pod.player-a {
+  border-color: rgba(47, 111, 214, 0.5);
+}
+
+.fighter-pod.player-b {
+  border-color: rgba(217, 87, 60, 0.5);
+}
+
+.fighter-pod.answered {
+  border-color: var(--ok);
+  box-shadow: 0 0 30px var(--ok-glow);
+}
+
+.fighter-avatar {
+  width: clamp(80px, 9vw, 130px);
+  height: clamp(80px, 9vw, 130px);
+  border-radius: 50%;
+  font-family: var(--f-head);
+  font-size: clamp(38px, 4.5vw, 64px);
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.fighter-pod.player-a .fighter-avatar {
+  background: #2f6fd6;
+  color: #fff;
+}
+
+.fighter-pod.player-b .fighter-avatar {
+  background: #d9573c;
+  color: #fff;
+}
+
+.fighter-name-display {
+  font-family: var(--f-head);
+  font-size: clamp(24px, 2.8vw, 42px);
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fighter-score-tag {
+  font-family: var(--f-mono);
+  font-size: clamp(18px, 1.8vw, 26px);
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.fighter-live-status {
+  margin-top: 18px;
+  font-family: var(--f-mono);
+  font-size: clamp(13px, 1.2vw, 16px);
+  font-weight: 700;
+  padding: 6px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--line);
+  color: var(--sage);
+}
+
+.fighter-live-status.ready {
+  background: rgba(47, 163, 127, 0.25);
+  border-color: var(--ok);
+  color: #7fe0bc;
+}
+
+.vs-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.vs-divider .vs-circle {
+  width: clamp(70px, 7vw, 100px);
+  height: clamp(70px, 7vw, 100px);
+  border-radius: 50%;
+  background: var(--ink);
+  border: 3px solid var(--gold);
+  color: var(--gold);
+  font-family: var(--f-head);
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px var(--gold-glow);
+}
+
+/* ==========================================================================
+   ESTADO D: PREGUNTA EN VIVO Y CRONÓMETRO AUTORITATIVO
+   ========================================================================== */
+.live-question-arena {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+}
+
+/* Barra y Metadatos de Pregunta */
+.proj-timer-wrap {
+  width: 100%;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  overflow: hidden;
+  margin-bottom: 1.5vh;
+}
+
+.proj-timer-bar {
+  width: 100%;
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.1s linear, background-color 0.3s;
+  transform-origin: left;
+}
+
+.proj-timer-bar.critical {
+  background: var(--bad);
+}
+
+.question-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5vh;
+}
+
+.question-category-tag {
+  font-family: var(--f-mono);
+  font-size: clamp(14px, 1.3vw, 18px);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+}
+
+.question-digital-clock {
+  font-family: var(--f-mono);
+  font-size: clamp(26px, 2.8vw, 42px);
+  font-weight: 900;
+  color: var(--gold-2);
+}
+
+.question-digital-clock.critical {
+  color: var(--bad);
+  animation: pulseClock 0.5s infinite alternate;
+}
+
+@keyframes pulseClock {
+  to { transform: scale(1.1); }
+}
+
+/* Enunciado Gigante */
+.proj-question-box {
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-radius: 20px;
+  padding: clamp(20px, 3vh, 36px) clamp(24px, 3vw, 44px);
+  margin-bottom: 2vh;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.proj-question-text {
+  font-family: var(--f-head);
+  font-size: clamp(24px, 2.7vw, 40px);
+  font-weight: 800;
+  line-height: 1.25;
+  color: #ffffff;
+  margin: 0;
+}
+
+/* Grid de Opciones Estilo Kahoot */
+.proj-options-grid {
+  display: grid;
+  gap: 16px;
+  flex: 1;
+  min-height: 240px;
+}
+
+.proj-options-grid.four {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.proj-options-grid.two {
+  grid-template-columns: 1fr 1fr;
+}
+
+.proj-option-card {
+  border-radius: 18px;
+  padding: clamp(16px, 2.5vh, 26px) clamp(20px, 2.5vw, 32px);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-family: var(--f-body);
+  font-size: clamp(18px, 2vw, 28px);
+  font-weight: 700;
+  box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.25), 0 8px 24px rgba(0, 0, 0, 0.35);
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.proj-option-card.opt-0 { background: var(--c0); }
+.proj-option-card.opt-1 { background: var(--c1); }
+.proj-option-card.opt-2 { background: var(--c2); }
+.proj-option-card.opt-3 { background: var(--c3); }
+
+.proj-option-card .shape {
+  font-size: clamp(28px, 3vw, 42px);
+  opacity: 0.95;
+  flex-shrink: 0;
+}
+
+.proj-option-card .text {
+  flex: 1;
+  line-height: 1.2;
+}
+
+/* Estados de Revelación */
+.proj-option-card.dimmed {
+  opacity: 0.25;
+  transform: scale(0.97);
+  filter: grayscale(0.5);
+}
+
+.proj-option-card.revealed-correct {
+  transform: scale(1.03);
+  box-shadow: 0 0 35px var(--ok-glow), inset 0 0 20px rgba(255, 255, 255, 0.4);
+  border: 3px solid #ffffff;
+  z-index: 2;
+}
+
+/* Barra Inferior de Estado de Respuestas */
+.duel-bottom-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 14px;
+  padding: 12px 24px;
+  margin-top: 1.5vh;
+  border: 1px solid var(--line);
+}
+
+.strip-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--f-mono);
+  font-size: clamp(14px, 1.3vw, 18px);
+}
+
+.strip-player .dot-status {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--sage-dim);
+}
+
+.strip-player.has-answered .dot-status {
+  background: var(--ok);
+  box-shadow: 0 0 12px var(--ok);
+}
+
+.strip-player.has-answered .name {
+  color: #7fe0bc;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   ESTADO E: REVELACIÓN Y EXPLICACIÓN TÉCNICA
+   ========================================================================== */
+.reveal-modal-panel {
+  background: var(--panel);
+  border: 2px solid var(--ok);
+  border-radius: 20px;
+  padding: clamp(20px, 3vh, 32px);
+  margin-top: 2vh;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reveal-title {
+  font-family: var(--f-head);
+  font-size: clamp(20px, 2vw, 28px);
+  font-weight: 800;
+  color: #7fe0bc;
+  margin: 0 0 8px 0;
+}
+
+.reveal-text {
+  font-size: clamp(16px, 1.5vw, 22px);
+  line-height: 1.4;
+  color: var(--mist);
+  margin: 0;
+}
+
+/* ==========================================================================
+   ESTADO F: BRACKET DEL TORNEO (CUADRO DE ELIMINATORIAS)
+   ========================================================================== */
+.bracket-stage {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.bracket-title {
+  font-family: var(--f-head);
+  font-size: clamp(24px, 2.4vw, 34px);
+  font-weight: 800;
+  color: var(--gold);
+  text-align: center;
+  margin: 0 0 2vh 0;
+}
+
+.bracket-viewport {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  gap: 3vw;
+  overflow-x: auto;
+  padding: 10px;
+}
+
+.bracket-round-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  min-width: 260px;
+  max-width: 320px;
+}
+
+.round-col-header {
+  font-family: var(--f-mono);
+  font-size: clamp(13px, 1.1vw, 16px);
+  font-weight: 700;
+  color: var(--sage);
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 12px;
+  letter-spacing: 0.1em;
+}
+
+.bracket-match-node {
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin: 8px 0;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+.bracket-match-node.active-duel {
+  border-color: var(--gold);
+  box-shadow: 0 0 16px var(--gold-glow);
+}
+
+.node-player {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-family: var(--f-body);
+  font-size: clamp(14px, 1.2vw, 17px);
+  color: var(--mist);
+}
+
+.node-player.winner {
+  color: var(--gold);
+  font-weight: 800;
+}
+
+.node-player .name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 190px;
+}
+
+.node-player .score {
+  font-family: var(--f-mono);
+  font-weight: 700;
+  color: var(--sage);
+}
+
+/* ==========================================================================
+   ESTADO G: PODIO FINAL Y CELEBRACIÓN
+   ========================================================================== */
+.podium-stage {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.podium-title {
+  font-family: var(--f-head);
+  font-size: clamp(34px, 4vw, 56px);
+  font-weight: 900;
+  color: var(--gold);
+  text-shadow: 0 0 25px var(--gold-glow);
+  margin: 0 0 4vh 0;
+  text-align: center;
+}
+
+.podium-pillars-wrap {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2vw;
+  width: 100%;
+  max-width: 1000px;
+  height: 55vh;
+}
+
+.podium-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.podium-pedestal {
+  width: 100%;
+  border-radius: 18px 18px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 18px;
+  font-family: var(--f-head);
+  font-weight: 900;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.podium-col.rank-1 .podium-pedestal {
+  height: 65%;
+  background: linear-gradient(180deg, #f2a93b 0%, #aa6e18 100%);
+  color: #2b1800;
+  font-size: clamp(48px, 6vw, 84px);
+}
+
+.podium-col.rank-2 .podium-pedestal {
+  height: 48%;
+  background: linear-gradient(180deg, #d8e2dc 0%, #8d99ae 100%);
+  color: #1a2228;
+  font-size: clamp(40px, 5vw, 68px);
+}
+
+.podium-col.rank-3 .podium-pedestal {
+  height: 35%;
+  background: linear-gradient(180deg, #e09f67 0%, #87532b 100%);
+  color: #2a1506;
+  font-size: clamp(36px, 4.5vw, 60px);
+}
+
+.podium-winner-info {
+  text-align: center;
+  margin-bottom: 16px;
+  animation: popInBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popInBounce {
+  from { opacity: 0; transform: translateY(40px) scale(0.8); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.podium-avatar {
+  width: clamp(60px, 7vw, 96px);
+  height: clamp(60px, 7vw, 96px);
+  border-radius: 50%;
+  border: 3px solid;
+  margin: 0 auto 10px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(28px, 3.5vw, 48px);
+  font-family: var(--f-head);
+  font-weight: 800;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.podium-col.rank-1 .podium-avatar {
+  background: var(--gold);
+  border-color: #fff;
+  color: #2b1800;
+}
+
+.podium-col.rank-2 .podium-avatar {
+  background: #d8e2dc;
+  border-color: #fff;
+  color: #1a2228;
+}
+
+.podium-col.rank-3 .podium-avatar {
+  background: #e09f67;
+  border-color: #fff;
+  color: #2a1506;
+}
+
+.podium-winner-name {
+  font-family: var(--f-head);
+  font-size: clamp(18px, 2.2vw, 32px);
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+
+.podium-winner-points {
+  font-family: var(--f-mono);
+  font-size: clamp(14px, 1.4vw, 20px);
+  font-weight: 700;
+  color: var(--gold-2);
+}

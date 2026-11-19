@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a302b">
+  <meta name="description" content="Torneo del Talento — Panel de Administración y Control del Organizador">
+  <title>Organizador | Torneo del Talento</title>
+
+  <!-- Fuentes e Iconos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Estilos del Sistema -->
+  <link rel="stylesheet" href="/public/css/theme.css">
+  <link rel="stylesheet" href="/public/css/organizer.css">
+</head>
+<body class="organizer-shell bg-blueprint">
+
+  <!-- =====================================================================
+       NAVBAR SUPERIOR
+       ===================================================================== -->
+  <header class="org-navbar">
+    <div class="org-brand">
+      <span class="org-brand-icon">⚡</span>
+      <div class="org-brand-text">
+        <h1>TORNEO DEL TALENTO</h1>
+        <span>Centro de Control del Organizador</span>
+      </div>
+    </div>
+
+    <div class="org-navbar-actions">
+      <div id="org-session-code" class="org-session-tag">
+        SALA: <b>NINGUNA</b>
+      </div>
+      <span id="org-auth-badge" class="badge badge-disconnected">Sin Autenticar</span>
+      <span id="org-connection-badge" class="badge badge-disconnected">
+        <span class="badge-dot"></span> Desconectado
+      </span>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       LAYOUT PRINCIPAL (SIDEBAR + PANELES)
+       ===================================================================== -->
+  <div class="org-layout">
+    <!-- Barra Lateral de Navegación -->
+    <aside class="org-sidebar">
+      <button class="org-nav-btn active" data-tab="summary" type="button">
+        <span class="icon">📊</span>
+        <span>Resumen General</span>
+      </button>
+      <button class="org-nav-btn" data-tab="create" type="button">
+        <span class="icon">➕</span>
+        <span>Crear / Conectar Sala</span>
+      </button>
+      <button class="org-nav-btn" data-tab="lobby" type="button">
+        <span class="icon">👥</span>
+        <span>Sala de Espera</span>
+      </button>
+      <button class="org-nav-btn" data-tab="matches" type="button">
+        <span class="icon">🏆</span>
+        <span>Cuadro de Duelos</span>
+      </button>
+      <button class="org-nav-btn" data-tab="connection" type="button">
+        <span class="icon">⚙️</span>
+        <span>Diagnóstico del Servidor</span>
+      </button>
+
+      <hr style="border:none; border-top:1px solid var(--line); margin: 12px 0;">
+
+      <a href="/original" target="_blank" class="org-nav-btn" style="text-decoration:none;">
+        <span class="icon">📜</span>
+        <span>Juego Original</span>
+      </a>
+    </aside>
+
+    <!-- Contenedor de Pestañas -->
+    <main class="org-content">
+
+      <!-- =================================================================
+           PESTAÑA 1: RESUMEN GENERAL
+           ================================================================= -->
+      <section id="tab-summary" class="org-tab-panel active">
+        <div class="org-card">
+          <div class="org-card-header">
+            <div>
+              <h2 id="summary-tourney-name" class="org-card-title">Sin torneo seleccionado</h2>
+              <div id="summary-tourney-status" style="font-size:13px; color:var(--sage); margin-top:4px;">
+                Crea una nueva sala o conecta una existente para comenzar
+              </div>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button id="btn-open-projection" class="btn btn-ghost" type="button">
+                🖥️ Abrir Proyección
+              </button>
+              <button id="btn-open-participant" class="btn btn-ghost" type="button">
+                📱 Ver como Participante
+              </button>
+            </div>
+          </div>
+
+          <!-- Métricas del Torneo -->
+          <div class="metrics-row">
+            <div class="metric-card gold">
+              <span class="metric-label">Código de Sala</span>
+              <span id="metric-room-code" class="metric-value">----</span>
+              <span class="metric-sub">Identificador único del torneo</span>
+            </div>
+
+            <div class="metric-card green">
+              <span class="metric-label">Participantes</span>
+              <span id="metric-participants" class="metric-value">0</span>
+              <span class="metric-sub">Jugadores conectados en lobby</span>
+            </div>
+
+            <div class="metric-card blue">
+              <span class="metric-label">Enfrentamientos</span>
+              <span id="metric-matches" class="metric-value">0</span>
+              <span class="metric-sub">Duelos del cuadro generados</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           PESTAÑA 2: CREAR / CONECTAR TORNEO
+           ================================================================= -->
+      <section id="tab-create" class="org-tab-panel">
+        <div class="org-card">
+          <div class="org-card-header">
+            <h2 class="org-card-title">Configurar Nuevo Torneo</h2>
+          </div>
+
+          <form id="form-create-tournament" autocomplete="off">
+            <div class="form-group">
+              <label for="input-tourney-name" class="form-label">Nombre del Torneo *</label>
+              <input
+                id="input-tourney-name"
+                class="form-input"
+                name="name"
+                type="text"
+                placeholder="Ej: Gran Torneo de Relaciones Industriales 2026"
+                required
+                minlength="3"
+                maxlength="80"
+              >
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="input-questions-per-duel" class="form-label">Preguntas por Duelo</label>
+                <input
+                  id="input-questions-per-duel"
+                  class="form-input"
+                  name="questionsPerDuel"
+                  type="number"
+                  min="1"
+                  max="10"
+                  value="2"
+                  required
+                >
+                <div class="form-help">Cantidad de preguntas en cada ronda 1v1 (1 a 10).</div>
+              </div>
+
+              <div class="form-group">
+                <label for="input-time-per-question" class="form-label">Segundos por Pregunta</label>
+                <input
+                  id="input-time-per-question"
+                  class="form-input"
+                  name="timePerQuestion"
+                  type="number"
+                  min="10"
+                  max="60"
+                  value="20"
+                  required
+                >
+                <div class="form-help">Duración del cronómetro autoritativo (10 a 60 seg).</div>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="input-max-participants" class="form-label">Cupo Máximo de Participantes</label>
+                <input
+                  id="input-max-participants"
+                  class="form-input"
+                  name="maxParticipants"
+                  type="number"
+                  min="2"
+                  max="64"
+                  value="32"
+                  required
+                >
+                <div class="form-help">Límite de inscripciones permitidas (2 a 64).</div>
+              </div>
+
+              <div class="form-group">
+                <label for="select-difficulty-mode" class="form-label">Modo de Dificultad</label>
+                <select id="select-difficulty-mode" class="form-input" name="difficultyMode">
+                  <option value="progressive" selected>Progresivo (Nivel 1 a 3)</option>
+                  <option value="random">Aleatorio Equilibrado</option>
+                </select>
+                <div class="form-help">Estrategia de selección del banco de 72 preguntas.</div>
+              </div>
+            </div>
+
+            <div class="form-grid-2" style="margin-top: 10px;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                <input type="checkbox" name="enableThirdPlace" checked>
+                <span>Habilitar duelo por el Tercer Puesto</span>
+              </label>
+
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                <input type="checkbox" name="soundEnabled" checked>
+                <span>Efectos de sonido en interfaces</span>
+              </label>
+            </div>
+
+            <div class="form-group" style="margin-top: 18px;">
+              <label for="input-admin-secret" class="form-label">Clave Secreta de Administrador (ADMIN_SECRET) *</label>
+              <input
+                id="input-admin-secret"
+                class="form-input"
+                name="adminSecret"
+                type="password"
+                value="dev-only__NO-usar-en-produccion"
+                placeholder="dev-only__NO-usar-en-produccion"
+                required
+              >
+              <div class="form-help">Clave configurada en el servidor (en desarrollo: dev-only__NO-usar-en-produccion).</div>
+            </div>
+
+            <div id="create-error" style="color:var(--bad); font-weight:600; min-height:20px; margin-bottom:12px;"></div>
+
+            <button id="btn-submit-create" class="btn btn-primary" type="submit">
+              🚀 CREAR TORNEO Y HABILITAR SALA
+            </button>
+          </form>
+        </div>
+
+        <!-- Conectar a Torneo Existente -->
+        <div class="org-card" style="margin-top: 20px;">
+          <div class="org-card-header">
+            <h2 class="org-card-title">Conectar a Sala Existente</h2>
+          </div>
+          <form id="form-connect-existing" autocomplete="off" style="max-width: 500px;">
+            <div class="form-group">
+              <label for="connect-code-input" class="form-label">Código del Torneo</label>
+              <input
+                id="connect-code-input"
+                class="form-input code-input"
+                type="text"
+                maxlength="8"
+                placeholder="XXXX"
+                required
+              >
+            </div>
+            <div class="form-group">
+              <label for="connect-secret-input" class="form-label">Clave de Administrador (ADMIN_SECRET)</label>
+              <input
+                id="connect-secret-input"
+                class="form-input"
+                type="password"
+                value="dev-only__NO-usar-en-produccion"
+                placeholder="dev-only__NO-usar-en-produccion"
+                required
+              >
+            </div>
+            <div id="connect-error" style="color:var(--bad); font-weight:600; min-height:20px; margin-bottom:12px;"></div>
+            <button class="btn btn-ghost" type="submit">
+              🔑 AUTENTICAR Y CONECTAR
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           PESTAÑA 3: SALA DE ESPERA (LOBBY)
+           ================================================================= -->
+      <section id="tab-lobby" class="org-tab-panel">
+        <div class="org-card">
+          <div class="org-card-header">
+            <div>
+              <h2 class="org-card-title">Participantes en Sala de Espera</h2>
+              <div style="font-size:13px; color:var(--sage); margin-top:4px;">
+                Torneo: <span id="lobby-code-display" class="badge badge-gold" style="font-size:14px;">----</span>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+              <span id="lobby-total-badge" class="badge">0 inscritos</span>
+              <span id="lobby-realtime-badge" class="badge badge-connected" style="font-size:11px;" title="La lista se actualiza automáticamente cuando alguien se une">
+                <span class="badge-dot badge-pulse"></span> En tiempo real
+              </span>
+              <button id="btn-refresh-lobby" class="btn" type="button" style="font-size:12px; font-weight:700; padding:8px 14px; background:rgba(212,175,55,0.15); border:1px solid var(--gold); color:var(--gold); cursor:pointer;" title="Recargar lista de participantes desde el servidor">
+                🔄 Recargar Participantes
+              </button>
+              <button id="btn-start-tournament" class="btn btn-primary" type="button" disabled>
+                ▶ INICIAR TORNEO
+              </button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 240px 1fr; gap: 20px;">
+            <!-- QR de Acceso Rápido -->
+            <div style="text-align:center; background:rgba(0,0,0,0.3); border:1px solid var(--line); border-radius:12px; padding:16px;">
+              <div style="font-family:var(--f-mono); font-size:11px; color:var(--gold); margin-bottom:8px; text-transform:uppercase;">Acceso Participantes</div>
+              <img id="lobby-qr-img" src="" alt="QR Torneo" style="width:160px; height:160px; background:#fff; padding:6px; border-radius:8px; display:inline-block;">
+              <div style="font-size:12px; color:var(--sage); margin-top:8px;">Escanea para jugar en vivo</div>
+            </div>
+
+            <!-- Tabla de Participantes -->
+            <div style="overflow-x:auto;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:12px; color:var(--sage);">Lista de participantes conectados:</span>
+                <button id="btn-refresh-table" class="btn" type="button" style="font-size:11px; padding:4px 10px; background:rgba(212,175,55,0.12); border:1px solid var(--gold); color:var(--gold); cursor:pointer;">
+                  🔄 Actualizar lista
+                </button>
+              </div>
+              <table class="org-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Nombre</th>
+                    <th>Conexión</th>
+                    <th>ID de Participante</th>
+                  </tr>
+                </thead>
+                <tbody id="participants-table-body">
+                  <tr>
+                    <td colspan="4" style="text-align:center; color:var(--sage); padding:24px;">
+                      No hay participantes conectados.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           PESTAÑA 4: GESTIÓN DE ENFRENTAMIENTOS
+           ================================================================= -->
+      <section id="tab-matches" class="org-tab-panel">
+        <div class="org-card">
+          <div class="org-card-header">
+            <h2 class="org-card-title">Cuadro de Eliminatorias</h2>
+          </div>
+
+          <!-- Panel de Control del Duelo Activo -->
+          <div id="duel-control-panel" class="card" style="margin-bottom:16px; display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <h3 style="color:var(--gold); margin:0;">⚔️ Control del Duelo Activo</h3>
+              <span id="duel-status-text" style="color:var(--mist); font-size:13px;">Sin duelo activo</span>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center; margin-bottom:14px; padding:12px; background:rgba(255,255,255,0.03); border-radius:10px;">
+              <div style="flex:1; text-align:center;">
+                <div id="duel-name-a" style="font-weight:700; color:var(--emerald); font-size:16px;">—</div>
+                <div id="duel-score-a" style="font-size:28px; font-weight:900; color:var(--gold);">0</div>
+                <div style="font-size:11px; color:var(--sage);">Jugador A</div>
+              </div>
+              <div style="font-size:24px; color:var(--mist);">VS</div>
+              <div style="flex:1; text-align:center;">
+                <div id="duel-name-b" style="font-weight:700; color:var(--emerald); font-size:16px;">—</div>
+                <div id="duel-score-b" style="font-size:28px; font-weight:900; color:var(--gold);">0</div>
+                <div style="font-size:11px; color:var(--sage);">Jugador B</div>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:8px;">
+              <button id="btn-launch-question" class="btn btn-primary" disabled>🎯 Lanzar Pregunta</button>
+              <button id="btn-close-question" class="btn btn-ghost" disabled>⏹ Cerrar Tiempo</button>
+              <button id="btn-reveal-answer" class="btn" style="background:var(--gold); color:#0a302b; font-weight:700;" disabled>🔍 Revelar Respuesta</button>
+              <button id="btn-next-match" class="btn btn-primary" disabled>⏭ Siguiente</button>
+              <button id="btn-finish-tournament" class="btn" style="background:var(--bad); color:white;" disabled>🏁 Finalizar Torneo</button>
+            </div>
+          </div>
+
+          <div id="matches-status-alert">
+            <div class="card" style="text-align:center; padding:30px;">
+              <p style="color:var(--sage); font-size:16px;">
+                El torneo aún no ha iniciado. Inicia el torneo en la pestaña <b>Sala de Espera</b> para generar los duelos.
+              </p>
+            </div>
+          </div>
+
+          <div id="bracket-preview-box" class="bracket-preview-box">
+            <!-- Rondas del bracket inyectadas dinámicamente -->
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           PESTAÑA 5: DIAGNÓSTICO DEL SERVIDOR
+           ================================================================= -->
+      <section id="tab-connection" class="org-tab-panel">
+        <div class="org-card">
+          <div class="org-card-header">
+            <h2 class="org-card-title">Centro de Conexión y Diagnóstico</h2>
+            <button id="btn-refresh-health" class="btn btn-ghost" type="button">🔄 Actualizar</button>
+          </div>
+
+          <table class="org-table">
+            <tbody>
+              <tr>
+                <td><b>WebSockets (Socket.IO):</b></td>
+                <td><span id="conn-socket-state" style="font-weight:700;">Verificando...</span></td>
+              </tr>
+              <tr>
+                <td><b>Base de Datos PostgreSQL:</b></td>
+                <td><span id="conn-db-state" style="font-weight:700;">Verificando...</span></td>
+              </tr>
+              <tr>
+                <td><b>Latencia de Base de Datos:</b></td>
+                <td><span id="conn-db-latency" style="font-family:var(--f-mono);">--</span></td>
+              </tr>
+              <tr>
+                <td><b>Banco de Preguntas Cargado:</b></td>
+                <td><span id="conn-questions-loaded">--</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- =====================================================================
+       MODAL DE CONFIRMACIÓN: INICIAR TORNEO
+       ===================================================================== -->
+  <div id="modal-confirm-start" class="org-modal-overlay">
+    <div class="org-modal">
+      <h3>¿Iniciar el Torneo Ahora?</h3>
+      <p>
+        Esta acción cerrará las inscripciones en la sala de espera, sorteará el cuadro de eliminatorias y dejará listos los duelos. Esta operación no se puede revertir.
+      </p>
+      <div class="org-modal-actions">
+        <button id="btn-cancel-start-action" class="btn btn-ghost" type="button">Cancelar</button>
+        <button id="btn-confirm-start-action" class="btn btn-primary" type="button">Sí, Iniciar Torneo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor global de notificaciones toast -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts del Sistema -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/public/js/audio.js"></script>
+  <script src="/public/js/organizer.js?v=2.5.1"></script>
+</body>
+</html>

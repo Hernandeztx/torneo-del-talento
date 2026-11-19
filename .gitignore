@@ -1,10 +1,53 @@
+# Dependencias
 node_modules/
+
+# Entornos y Secretos
 .env
-.DS_Store
+.env.*
+!.env.example
+
+# Logs y Depuración
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Cobertura y Pruebas
+coverage/
+.nyc_output/
+
+# Compilados y Empaquetados
+dist/
+build/
+
+# Archivos de Sistema Operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores e IDEs
 .idea/
 .vscode/
-dist/
-coverage/
+*.sw?
+*.sublime-project
+*.sublime-workspace
 
+# Certificados y Claves Privadas
+*.key
+*.pem
+*.cert
+*.crt
+*.pfx
+*.p12
+
+# Dumps y Backups de Base de Datos
+*.sql.bak
+*.sql.dump
+*.dump
+*.backup
+
+# Documentos locales personales y temporales de trabajo (No para el repositorio)
+DIALOGO Karen.docx
+Documento (22).docx
+Guia_pesaje_y_prueba_V2.pdf
+newpromt.md

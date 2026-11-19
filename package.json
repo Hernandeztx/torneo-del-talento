@@ -7,7 +7,10 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "db:init": "node src/db/init.js",
-    "test": "node tests/phase1.test.js && node tests/phase1_1.test.js && node tests/phase1_2.test.js"
+    "test": "node tests/phase1.test.js && node tests/phase1_1.test.js && node tests/phase1_2.test.js && node tests/phase2_participant.test.js && node tests/phase2_projection.test.js && node tests/phase2_organizer.test.js && node tests/phase2_duel_engine.test.js && node tests/phase2_e2e_integration.test.js",
+    "test:unit": "node tests/phase1.test.js && node tests/phase1_1.test.js && node tests/phase1_2.test.js",
+    "test:integration": "node tests/phase2_participant.test.js && node tests/phase2_projection.test.js && node tests/phase2_organizer.test.js && node tests/phase2_duel_engine.test.js",
+    "test:e2e": "node tests/phase2_e2e_integration.test.js"
   },
   "keywords": [
     "socket.io",

@@ -1,0 +1,451 @@
+/* ==========================================================================
+   TORNEO DEL TALENTO — ESTILOS DEL PARTICIPANTE (/jugar)
+   Diseño móvil táctil tipo Kahoot con identidad esmeralda y oro
+   ========================================================================== */
+
+.participant-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 14px 16px env(safe-area-inset-bottom, 16px) 16px;
+  position: relative;
+}
+
+/* Encabezado fijo superior */
+.p-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0 16px 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+}
+
+.p-header .actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-icon {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--line);
+  color: var(--mist);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: border-color 0.2s;
+}
+
+.btn-icon:hover {
+  border-color: var(--gold);
+}
+
+/* Contenedor de pantallas */
+.screen {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  animation: screenFade 0.2s ease-out;
+}
+
+.screen.active {
+  display: flex;
+}
+
+@keyframes screenFade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   PANTALLA 1: INGRESO (BIENVENIDA Y REGISTRO)
+   ========================================================================== */
+.join-hero {
+  text-align: center;
+  padding: 24px 0 16px 0;
+}
+
+.join-hero .title {
+  margin: 8px 0 4px 0;
+  font-family: var(--f-head);
+  font-size: clamp(32px, 8vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--mist);
+}
+
+.join-hero .title em {
+  font-style: normal;
+  color: var(--gold);
+}
+
+.join-hero .subtitle {
+  color: var(--sage);
+  font-size: 15px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.join-card {
+  margin-top: 10px;
+}
+
+.code-input {
+  font-family: var(--f-mono);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   PANTALLA 2: SALA DE ESPERA (LOBBY)
+   ========================================================================== */
+.lobby-card {
+  text-align: center;
+  padding: 30px 20px;
+  margin-bottom: 18px;
+}
+
+.lobby-avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--f-head);
+  font-size: 32px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px auto;
+  box-shadow: 0 0 25px var(--gold-glow);
+}
+
+.lobby-name {
+  font-family: var(--f-head);
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+}
+
+.lobby-status {
+  font-size: 14px;
+  color: var(--sage);
+  margin-bottom: 20px;
+}
+
+.participants-box {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 10px;
+}
+
+.participants-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+
+.participants-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.participant-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.participant-pill.me {
+  background: rgba(242, 169, 59, 0.18);
+  border-color: var(--gold);
+  color: var(--gold-2);
+}
+
+.waiting-pulse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+  font-family: var(--f-mono);
+  font-size: 13px;
+  color: var(--sage);
+}
+
+/* ==========================================================================
+   PANTALLA 3: ESPECTADOR / ESPERANDO TURNO
+   ========================================================================== */
+.spectator-box {
+  text-align: center;
+  padding: 32px 18px;
+}
+
+.spectator-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(47, 111, 214, 0.2);
+  border: 1px solid #2f6fd6;
+  color: #8bb3f8;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.duel-banner {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.fighter-name {
+  font-family: var(--f-head);
+  font-size: 18px;
+  font-weight: 800;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vs-tag {
+  font-family: var(--f-head);
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--gold);
+}
+
+/* ==========================================================================
+   PANTALLA 4: PREGUNTA Y BOTONERA KAHOOT
+   ========================================================================== */
+.question-header {
+  margin-bottom: 12px;
+}
+
+.timer-bar-wrap {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.timer-bar {
+  height: 100%;
+  width: 100%;
+  background: var(--gold);
+  transition: width 0.1s linear, background-color 0.3s;
+  transform-origin: left;
+}
+
+.timer-bar.critical {
+  background: var(--bad);
+}
+
+.question-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--sage);
+  text-transform: uppercase;
+}
+
+.question-meta .time-left {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.question-text {
+  font-family: var(--f-head);
+  font-size: clamp(18px, 4.5vw, 22px);
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 10px 0 16px 0;
+  min-height: 52px;
+}
+
+/* Botonera de Opciones Táctiles */
+.options-grid {
+  display: grid;
+  gap: 12px;
+  flex: 1;
+}
+
+.options-grid.four {
+  grid-template-columns: 1fr 1fr;
+}
+
+.options-grid.two {
+  grid-template-columns: 1fr 1fr;
+}
+
+.option-btn {
+  border: none;
+  border-radius: 14px;
+  padding: 16px 12px;
+  min-height: clamp(84px, 15vh, 130px);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  font-family: var(--f-body);
+  font-size: clamp(15px, 3.8vw, 19px);
+  font-weight: 700;
+  line-height: 1.15;
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.28), 0 4px 12px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.1s ease, filter 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.option-btn:active:not(:disabled) {
+  transform: scale(0.96);
+  filter: brightness(0.9);
+}
+
+.option-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.option-btn.opt-0 { background: var(--c0); }
+.option-btn.opt-1 { background: var(--c1); }
+.option-btn.opt-2 { background: var(--c2); }
+.option-btn.opt-3 { background: var(--c3); }
+
+.option-btn .shape-icon {
+  font-size: 22px;
+  opacity: 0.9;
+}
+
+/* ==========================================================================
+   PANTALLA 5: RESPUESTA ENVIADA (BLOQUEADA)
+   ========================================================================== */
+.answered-card {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.answered-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(242, 169, 59, 0.2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin: 0 auto 20px auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.answered-title {
+  font-family: var(--f-head);
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  color: var(--gold);
+}
+
+.answered-time {
+  font-family: var(--f-mono);
+  font-size: 15px;
+  color: var(--sage);
+}
+
+/* ==========================================================================
+   PANTALLA 6: REVELACIÓN Y RESULTADO DE PREGUNTA
+   ========================================================================== */
+.verdict-card {
+  padding: 24px 20px;
+  border-radius: 14px;
+  border: 2px solid;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.verdict-card.ok {
+  border-color: var(--ok);
+  background: rgba(47, 163, 127, 0.15);
+}
+
+.verdict-card.bad {
+  border-color: var(--bad);
+  background: rgba(224, 113, 79, 0.15);
+}
+
+.verdict-badge {
+  font-family: var(--f-head);
+  font-size: 28px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.verdict-card.ok .verdict-badge { color: #7fe0bc; }
+.verdict-card.bad .verdict-badge { color: #ffab90; }
+
+.verdict-points {
+  font-family: var(--f-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+
+.verdict-expl {
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--mist);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 12px;
+  border-radius: 8px;
+  text-align: left;
+}

@@ -20,6 +20,16 @@ const {
   getQuestionDuration
 } = require("../questions/questionService");
 const { calculateScore } = require("../engine/scoring");
+const {
+  startMatch,
+  launchQuestion,
+  closeQuestion,
+  revealAnswer,
+  checkMatchEnd,
+  finishMatch,
+  selectNextMatch,
+  finishTournament
+} = require("../engine/duelOrchestrator");
 
 let ioInstance = null;
 
@@ -98,6 +108,21 @@ function initSocketServer(httpServer) {
               name: reconnected.name,
               tournamentCode: roomCode
             };
+
+            // Módulo 2.6: Recuperación transparente de pregunta en curso tras recarga
+            const activeRoom = getRoom(roomCode);
+            if (activeRoom && activeRoom.activeQuestion && activeRoom.duelState === "question_active") {
+              const hasAlreadyAnswered = activeRoom.activeQuestion.receivedAnswers?.has(reconnected.id) || false;
+              socket.emit("question_started", {
+                matchId: activeRoom.currentMatchId,
+                question: sanitizeQuestionForClient(activeRoom.activeQuestion),
+                durationMs: activeRoom.activeQuestion.durationMs,
+                startTime: activeRoom.activeQuestion.startTime,
+                questionOrder: activeRoom.activeQuestion.questionOrder,
+                totalQuestions: activeRoom.settings?.questionsPerDuel || 2,
+                hasAlreadyAnswered
+              });
+            }
           }
         }
 
@@ -151,7 +176,10 @@ function initSocketServer(httpServer) {
       }
 
       socket.join(roomCode);
-      socket.data.role = "proyeccion";
+      // No degradar rol si ya es organizador autenticado
+      if (socket.data.role !== "organizador") {
+        socket.data.role = "proyeccion";
+      }
       socket.data.tournamentCode = roomCode;
       socket.data.authenticated = true;
 
@@ -165,13 +193,19 @@ function initSocketServer(httpServer) {
         code: roomCode,
         name: room.name,
         status: room.status,
+        duelState: room.duelState || "waiting",
         participants: pList,
         rounds: room.rounds,
         thirdMatch: room.thirdMatch,
-        currentMatchId: room.currentMatchId
+        currentMatchId: room.currentMatchId,
+        activeQuestion: room.activeQuestion && room.duelState === "question_active"
+          ? sanitizeQuestionForClient(room.activeQuestion)
+          : null,
+        durationMs: room.activeQuestion?.durationMs,
+        startTime: room.activeQuestion?.startTime
       });
 
-      if (callback) callback({ success: true });
+      if (callback) callback({ success: true, participants: pList, status: room.status, name: room.name });
     });
 
     // -------------------------------------------------------------------
@@ -195,7 +229,26 @@ function initSocketServer(httpServer) {
       socket.data.tournamentCode = roomCode;
       socket.data.authenticated = true;
 
-      if (callback) callback({ success: true, message: "Organizador autenticado." });
+      const pList = Array.from(room.participants.values()).map((p) => ({
+        id: p.id,
+        name: p.name,
+        isConnected: p.isConnected
+      }));
+
+      if (callback) callback({
+        success: true,
+        message: "Organizador autenticado.",
+        tournament: {
+          code: roomCode,
+          name: room.name,
+          status: room.status,
+          participants: pList,
+          rounds: room.rounds,
+          thirdMatch: room.thirdMatch,
+          currentMatchId: room.currentMatchId,
+          duelState: room.duelState || "idle"
+        }
+      });
     });
 
     // -------------------------------------------------------------------
@@ -337,6 +390,184 @@ function initSocketServer(httpServer) {
       });
 
       if (callback) callback({ success: true, message: "Respuesta recibida correctamente." });
+    });
+
+    // -------------------------------------------------------------------
+    // 7. EVENTOS AUTORITATIVOS DEL ORGANIZADOR — MÓDULO 2.5
+    // -------------------------------------------------------------------
+
+    // A. Iniciar enfrentamiento específico
+    socket.on("organizer_start_match", async (payload, callback) => {
+      const { code, matchId } = payload || {};
+      const roomCode = (code || socket.data.tournamentCode || "").toUpperCase();
+
+      if (!socket.data.authenticated || socket.data.role !== "organizador" || socket.data.tournamentCode !== roomCode) {
+        return callback && callback({ error: "No autorizado: credenciales de organizador requeridas para este torneo." });
+      }
+
+      const room = getRoom(roomCode);
+      if (!room) return callback && callback({ error: "Torneo no encontrado." });
+
+      try {
+        const result = await startMatch(room, matchId, io);
+        if (callback) callback({ success: true, data: result });
+      } catch (err) {
+        if (callback) callback({ error: err.message });
+      }
+    });
+
+    // B. Lanzar pregunta en el duelo activo
+    socket.on("organizer_launch_question", async (payload, callback) => {
+      const { code } = payload || {};
+      const roomCode = (code || socket.data.tournamentCode || "").toUpperCase();
+
+      if (!socket.data.authenticated || socket.data.role !== "organizador" || socket.data.tournamentCode !== roomCode) {
+        return callback && callback({ error: "No autorizado: credenciales de organizador requeridas." });
+      }
+
+      const room = getRoom(roomCode);
+      if (!room) return callback && callback({ error: "Torneo no encontrado." });
+
+      try {
+        const q = await launchQuestion(room, io);
+        if (callback) callback({ success: true, questionId: q.id });
+      } catch (err) {
+        if (callback) callback({ error: err.message });
+      }
+    });
+
+    // C. Cerrar pregunta manualmente
+    socket.on("organizer_close_question", (payload, callback) => {
+      const { code } = payload || {};
+      const roomCode = (code || socket.data.tournamentCode || "").toUpperCase();
+
+      if (!socket.data.authenticated || socket.data.role !== "organizador" || socket.data.tournamentCode !== roomCode) {
+        return callback && callback({ error: "No autorizado: credenciales de organizador requeridas." });
+      }
+
+      const room = getRoom(roomCode);
+      if (!room) return callback && callback({ error: "Torneo no encontrado." });
+
+      try {
+        closeQuestion(room);
+        io.to(roomCode).emit("question_closed", {
+          matchId: room.currentMatchId,
+          timeExpired: false
+        });
+        if (callback) callback({ success: true });
+      } catch (err) {
+        if (callback) callback({ error: err.message });
+      }
+    });
+
+    // D. Revelar respuesta oficial
+    socket.on("organizer_reveal_answer", async (payload, callback) => {
+      const { code } = payload || {};
+      const roomCode = (code || socket.data.tournamentCode || "").toUpperCase();
+
+      if (!socket.data.authenticated || socket.data.role !== "organizador" || socket.data.tournamentCode !== roomCode) {
+        return callback && callback({ error: "No autorizado: credenciales de organizador requeridas." });
+      }
+
+      const room = getRoom(roomCode);
+      if (!room) return callback && callback({ error: "Torneo no encontrado." });
+
+      try {
+        const result = await revealAnswer(room, io);
+        if (callback) callback({ success: true, data: result });
+      } catch (err) {
+        if (callback) callback({ error: err.message });
+      }
+    });
+
+    // E. Avanzar al siguiente paso del torneo (siguiente pregunta, match o fin)
+    socket.on("organizer_next_match", async (payload, callback) => {
+      const { code } = payload || {};
+      const roomCode = (code || socket.data.tournamentCode || "").toUpperCase();
+
+      if (!socket.data.authenticated || socket.data.role !== "organizador" || socket.data.tournamentCode !== roomCode) {
+        return callback && callback({ error: "No autorizado: credenciales de organizador requeridas." });
+      }
+
+      const room = getRoom(roomCode);
+      if (!room) return callback && callback({ error: "Torneo no encontrado." });
+
+      try {
+        // Si aún faltan preguntas por jugar en este duelo
+        if (!checkMatchEnd(room)) {
+          const match = room.matches.get(room.currentMatchId) ||
+            (room.thirdMatch && room.thirdMatch.id === room.currentMatchId ? room.thirdMatch : null);
+          const inZeroTiebreak = match && match.inZeroTiebreak;
+
+          // Notificar a la sala que se requiere desempate
+          if (inZeroTiebreak) {
+            io.to(roomCode).emit("tiebreak_required", {
+              matchId: room.currentMatchId,
+              message: "Empate 0-0: se lanzará una pregunta extra de desempate."
+            });
+          }
+
+          return callback && callback({
+            success: true,
+            action: inZeroTiebreak ? "tiebreak_question" : "launch_next_question",
+            message: inZeroTiebreak
+              ? "⚖️ Empate 0-0: lanza una pregunta extra de desempate."
+              : "El duelo continúa. Lanza la siguiente pregunta."
+          });
+        }
+
+        // Finalizar el duelo actual
+        const matchResult = await finishMatch(room, io);
+
+        // Seleccionar el próximo match o detectar fin
+        const { nextMatch, tournamentFinished } = selectNextMatch(room);
+
+        if (tournamentFinished) {
+          await finishTournament(room, io);
+          return callback && callback({
+            success: true,
+            action: "tournament_finished",
+            message: "¡Torneo completado!"
+          });
+        }
+
+        if (nextMatch) {
+          return callback && callback({
+            success: true,
+            action: "match_advanced",
+            nextMatchId: nextMatch.id,
+            message: `Siguiente enfrentamiento listo: ${nextMatch.id}`
+          });
+        }
+
+        return callback && callback({
+          success: true,
+          action: "waiting_matches",
+          message: "Esperando a que concluyan otros enfrentamientos de la ronda."
+        });
+      } catch (err) {
+        if (callback) callback({ error: err.message });
+      }
+    });
+
+    // F. Finalizar torneo manualmente
+    socket.on("organizer_finish_tournament", async (payload, callback) => {
+      const { code } = payload || {};
+      const roomCode = (code || socket.data.tournamentCode || "").toUpperCase();
+
+      if (!socket.data.authenticated || socket.data.role !== "organizador" || socket.data.tournamentCode !== roomCode) {
+        return callback && callback({ error: "No autorizado: credenciales de organizador requeridas." });
+      }
+
+      const room = getRoom(roomCode);
+      if (!room) return callback && callback({ error: "Torneo no encontrado." });
+
+      try {
+        const result = await finishTournament(room, io);
+        if (callback) callback({ success: true, data: result });
+      } catch (err) {
+        if (callback) callback({ error: err.message });
+      }
     });
 
     // -------------------------------------------------------------------

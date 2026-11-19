@@ -14,12 +14,28 @@ const server = http.createServer(app);
 // Inicializar Socket.IO sobre el servidor HTTP
 initSocketServer(server);
 
+const os = require("os");
+
+function getLocalIpAddress() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === "IPv4" && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return "localhost";
+}
+
 async function startServer() {
+  const localIp = getLocalIpAddress();
+
   console.log("==================================================");
   console.log("🚀 INICIANDO TORNEO DEL TALENTO — BACKEND BASE");
   console.log("==================================================");
   console.log(`📍 Entorno: ${env.NODE_ENV}`);
-  console.log(`🌐 URL Pública: ${env.PUBLIC_URL}`);
+  console.log(`🌐 IP de Red Local (Wi-Fi): http://${localIp}:${env.PORT}`);
   console.log(`📚 Banco de preguntas: ${TOTAL_STATIC_QUESTIONS} estáticas + ${Object.keys(GENS).length} generadores matemáticos cargados.`);
 
   // Verificar conexión con PostgreSQL
@@ -33,11 +49,12 @@ async function startServer() {
     console.warn("ℹ️ El servidor operará en modo memoria mientras PostgreSQL no esté disponible.");
   }
 
-  server.listen(env.PORT, () => {
-    console.log(`⚡ Servidor HTTP y WebSockets escuchando en el puerto ${env.PORT}`);
-    console.log(`👉 Healthcheck: ${env.PUBLIC_URL}/api/health`);
-    console.log(`👉 Vista de Participante: ${env.PUBLIC_URL}/jugar`);
-    console.log(`👉 Archivo original preservado: ${env.PUBLIC_URL}/original`);
+  server.listen(env.PORT, "0.0.0.0", () => {
+    console.log(`⚡ Servidor escuchando en TODAS las interfaces (0.0.0.0:${env.PORT})`);
+    console.log(`👉 Panel Organizador (este equipo): http://localhost:${env.PORT}/organizador`);
+    console.log(`👉 Panel Organizador (misma red):   http://${localIp}:${env.PORT}/organizador`);
+    console.log(`👉 Vista de Participante (celulares): http://${localIp}:${env.PORT}/jugar`);
+    console.log(`👉 Pantalla de Proyección:           http://${localIp}:${env.PORT}/proyeccion`);
     console.log("==================================================");
   });
 }
